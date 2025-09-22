@@ -148,42 +148,41 @@ export default function EnhancedVariablesTable({
     <Card data-testid="card-enhanced-variables">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            {t("realTimeData")}
-            <Badge variant="outline" className="font-mono text-xs">
-              {totalVariables} {t("variables")}
-            </Badge>
-            {selectedCount > 0 && (
-              <Badge variant="default" className="font-mono text-xs">
-                {selectedCount} {t("selected")}
+          <div className="flex items-center gap-4">
+            <CardTitle className="flex items-center gap-2">
+              {t("realTimeData")}
+              <Badge variant="outline" className="font-mono text-xs">
+                {totalVariables} {t("variables")}
               </Badge>
-            )}
-          </CardTitle>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              {t("lastUpdated")}: {new Date().toLocaleTimeString()}
-            </span>
+              {selectedCount > 0 && (
+                <Badge variant="default" className="font-mono text-xs">
+                  {selectedCount} {t("selected")}
+                </Badge>
+              )}
+            </CardTitle>
             
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              data-testid="button-refresh-variables"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onExportCSV}
-              data-testid="button-export-variables"
-            >
-              <Download className="h-4 w-4" />
-              CSV
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                data-testid="button-refresh-variables"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={onExportCSV}
+                className="bg-green-600 text-white"
+                data-testid="button-export-variables"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                CSV
+              </Button>
+            </div>
           </div>
         </div>
         

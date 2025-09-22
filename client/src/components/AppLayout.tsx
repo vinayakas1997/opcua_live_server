@@ -174,6 +174,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center gap-4">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
               
+              <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" data-testid="button-add-new">
+                    <Plus className="w-4 h-4 mr-2" />
+                    {t("addNew")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{t("uploadJsonConfig")}</DialogTitle>
+                  </DialogHeader>
+                  <JsonUploader
+                    onConfigUploaded={handleConfigUploaded}
+                    onClose={() => setIsUploadDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+              
               <Tabs value={currentPage} onValueChange={handleTabChange}>
                 <TabsList data-testid="tabs-navigation">
                   <TabsTrigger value="dashboard" data-testid="tab-dashboard">
@@ -202,24 +220,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
             
             <div className="flex items-center gap-3">
-              <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" data-testid="button-add-new">
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t("addNew")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{t("uploadJsonConfig")}</DialogTitle>
-                  </DialogHeader>
-                  <JsonUploader
-                    onConfigUploaded={handleConfigUploaded}
-                    onClose={() => setIsUploadDialogOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
-              
               <LanguageSwitcher />
             </div>
           </header>

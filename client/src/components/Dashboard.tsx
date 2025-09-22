@@ -200,11 +200,16 @@ export default function Dashboard() {
 
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
-            {selectedPLC ? `${selectedPLC.plc_name} Variables` : "OPC UA Dashboard"}
-          </h1>
-          <div className="text-sm text-muted-foreground" data-testid="text-plcs-connected">
-            {connectedPLCs.length}/{plcs.length} PLCs Connected
+          <div>
+            <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
+              {selectedPLC ? `${selectedPLC.plc_name} Variables` : "OPC UA Dashboard"}
+            </h1>
+            <div className="text-sm text-muted-foreground mt-1" data-testid="text-plcs-connected">
+              {connectedPLCs.length}/{plcs.length} PLCs Connected
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground" data-testid="text-last-updated">
+            {t("lastUpdated")}: {new Date().toLocaleTimeString()}
           </div>
         </div>
       </div>
@@ -212,7 +217,7 @@ export default function Dashboard() {
       <div className="flex-1 overflow-hidden">
         {connectedPLCs.length > 0 || selectedPLC ? (
           <EnhancedVariablesTable 
-            plc={normalizedSelectedPLC}
+            plc={normalizedSelectedPLC || undefined}
             onExportCSV={handleExportCSV}
             onRefresh={() => {
               queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
