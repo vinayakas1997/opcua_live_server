@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import {
@@ -7,29 +6,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Language } from "@shared/schema";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface LanguageSwitcherProps {
-  currentLanguage: Language;
-  onLanguageChange: (language: Language) => void;
-}
-
-const translations = {
-  en: {
-    english: "English",
-    japanese: "Japanese",
-  },
-  jp: {
-    english: "英語",
-    japanese: "日本語",
-  },
-};
-
-export default function LanguageSwitcher({
-  currentLanguage,
-  onLanguageChange,
-}: LanguageSwitcherProps) {
-  const t = translations[currentLanguage];
+export default function LanguageSwitcher() {
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <DropdownMenu>
@@ -41,21 +21,21 @@ export default function LanguageSwitcher({
           data-testid="button-language-switcher"
         >
           <Globe className="h-4 w-4" />
-          {currentLanguage.toUpperCase()}
+          {language.toUpperCase()}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => onLanguageChange("en")}
+          onClick={() => setLanguage("en")}
           data-testid="option-language-en"
         >
-          {t.english}
+          {t("english")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => onLanguageChange("jp")}
+          onClick={() => setLanguage("jp")}
           data-testid="option-language-jp"
         >
-          {t.japanese}
+          {t("japanese")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

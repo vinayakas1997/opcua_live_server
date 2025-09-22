@@ -19,17 +19,17 @@ import { useLocation } from "wouter";
 import { AppSidebar } from "./AppSidebar";
 import LanguageSwitcher from "./LanguageSwitcher";
 import JsonUploader from "./JsonUploader";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { api } from "@/lib/api";
 import { socketManager } from "@/lib/socket";
 import { useToast } from "@/hooks/use-toast";
-import { type Language, type PLCConfig, type PLC, type NodeData } from "@shared/schema";
+import { type PLCConfig, type PLC, type NodeData } from "@shared/schema";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [language, setLanguage] = useState<Language>("en");
   const [selectedPLCs, setSelectedPLCs] = useState<Set<string>>(new Set());
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
@@ -38,6 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [location, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Get current page from route
   const currentPage = location === '/servers' ? 'servers' : 'dashboard';
@@ -56,13 +57,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
       setSelectedPLCs(prev => new Set(Array.from(prev).concat(updatedPLC.id)));
       socketManager.subscribeToPLC(updatedPLC.id);
       toast({
-        title: "PLC Connected",
-        description: `Successfully connected to ${updatedPLC.plc_name}`,
+        title: t("serverConnected"),
+        description: `${t("success")}: ${updatedPLC.plc_name}`,
       });
     },
     onError: (error) => {
       toast({
-        title: "Connection Failed",
+        title: t("connectionFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -81,13 +82,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
       });
       socketManager.unsubscribeFromPLC(updatedPLC.id);
       toast({
-        title: "PLC Disconnected",
-        description: `Disconnected from ${updatedPLC.plc_name}`,
+        title: t("serverDisconnected"),
+        description: `${t("disconnected")}: ${updatedPLC.plc_name}`,
       });
     },
     onError: (error) => {
       toast({
-        title: "Disconnection Failed",
+        title: t("connectionFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -100,13 +101,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
       toast({
-        title: "PLC Added",
-        description: "Successfully added new PLC configuration",
+        title: t("plcAdded"),
+        description: t("plcAddedSuccess"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Failed to Add PLC",
+        title: t("plcAddFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -177,11 +178,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <TabsList data-testid="tabs-navigation">
                   <TabsTrigger value="dashboard" data-testid="tab-dashboard">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
+                    {t("dashboard")}
                   </TabsTrigger>
                   <TabsTrigger value="servers" data-testid="tab-servers">
                     <Server className="w-4 h-4 mr-2" />
-                    OPCUA Servers
+                    {t("opcuaServers")}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -189,7 +190,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               {currentPage === 'dashboard' && (
                 <div className="flex items-center gap-2">
                   <Input
-                    placeholder="Search nodes..."
+                    placeholder={t("search")}
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
                     className="w-64"
@@ -205,12 +206,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <DialogTrigger asChild>
                   <Button size="sm" data-testid="button-add-new">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add New
+                    {t("addNew")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Upload PLC Configuration</DialogTitle>
+                    <DialogTitle>{t("uploadJsonConfig")}</DialogTitle>
                   </DialogHeader>
                   <JsonUploader
                     onConfigUploaded={handleConfigUploaded}
@@ -219,10 +220,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </DialogContent>
               </Dialog>
               
-              <LanguageSwitcher
-                currentLanguage={language}
-                onLanguageChange={setLanguage}
-              />
+              <LanguageSwitcher />
             </div>
           </header>
 
