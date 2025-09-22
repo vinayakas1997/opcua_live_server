@@ -28,6 +28,13 @@ export class MemStorage implements IStorage {
     this.plcs = new Map();
     this.nodeData = new Map();
     this.serverStatuses = new Map();
+    
+    // Initialize with mock PLCs from schema
+    import("@shared/schema").then(({ mockPLCs }) => {
+      mockPLCs.forEach(plc => {
+        this.plcs.set(plc.id, plc);
+      });
+    });
   }
 
   async getAllPLCs(): Promise<PLC[]> {

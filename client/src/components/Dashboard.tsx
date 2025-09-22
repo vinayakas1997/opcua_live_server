@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,60 +13,150 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Plus, Search } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppSidebar } from "./AppSidebar";
 import LanguageSwitcher from "./LanguageSwitcher";
 import JsonUploader from "./JsonUploader";
 import LiveDataTable from "./LiveDataTable";
-import { mockPLCs, mockNodeData, type Language, type PLCConfig, type PLC } from "@shared/schema";
+import { api } from "@/lib/api";
+import { socketManager } from "@/lib/socket";
+import { useToast } from "@/hooks/use-toast";
+import { type Language, type PLCConfig, type PLC, type NodeData } from "@shared/schema";
 
 export default function Dashboard() {
   const [language, setLanguage] = useState<Language>("en");
-  const [plcs, setPLCs] = useState<PLC[]>(mockPLCs);
-  const [selectedPLCs, setSelectedPLCs] = useState<Set<string>>(new Set(["1"]));
+  const [selectedPLCs, setSelectedPLCs] = useState<Set<string>>(new Set());
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
+  const [nodeData, setNodeData] = useState<NodeData[]>([]);
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Fetch PLCs
+  const { data: plcs = [], isLoading } = useQuery({
+    queryKey: ["/api/plcs"],
+    queryFn: api.getAllPLCs,
+  });
+
+  // Connect PLC mutation
+  const connectMutation = useMutation({
+    mutationFn: api.connectPLC,
+    onSuccess: (updatedPLC) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      setSelectedPLCs(prev => new Set(Array.from(prev).concat(updatedPLC.id)));
+      socketManager.subscribeToPLC(updatedPLC.id);
+      toast({
+        title: "PLC Connected",
+        description: `Successfully connected to ${updatedPLC.plc_name}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Connection Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Disconnect PLC mutation
+  const disconnectMutation = useMutation({
+    mutationFn: api.disconnectPLC,
+    onSuccess: (updatedPLC) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      setSelectedPLCs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(updatedPLC.id);
+        return newSet;
+      });
+      socketManager.unsubscribeFromPLC(updatedPLC.id);
+      toast({
+        title: "PLC Disconnected",
+        description: `Disconnected from ${updatedPLC.plc_name}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Disconnection Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create PLC mutation
+  const createMutation = useMutation({
+    mutationFn: api.createPLC,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      toast({
+        title: "PLC Added",
+        description: "Successfully added new PLC configuration",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Add PLC",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // WebSocket connection
+  useEffect(() => {
+    const socket = socketManager.connect();
+
+    socket.on("nodeDataUpdate", (data: NodeData[]) => {
+      setNodeData(data);
+    });
+
+    socket.on("plcs", (data: PLC[]) => {
+      queryClient.setQueryData(["/api/plcs"], data);
+    });
+
+    return () => {
+      socketManager.disconnect();
+    };
+  }, [queryClient]);
 
   const handleConfigUploaded = (config: PLCConfig) => {
-    console.log('Adding new PLC config:', config);
-    const newPLC: PLC = {
-      ...config,
-      id: Math.random().toString(36).substr(2, 9),
-      status: "maintenance",
-      last_checked: new Date(),
-      is_connected: false,
-      created_at: new Date(),
-    };
-    
-    setPLCs(prev => [...prev, newPLC]);
+    createMutation.mutate(config);
     setIsUploadDialogOpen(false);
   };
 
   const handleConnectPLC = (plcId: string) => {
-    console.log(`Connecting PLC ${plcId}`);
-    setPLCs(prev => 
-      prev.map(plc => 
-        plc.id === plcId 
-          ? { ...plc, is_connected: true, status: "active" as const }
-          : plc
-      )
-    );
-    setSelectedPLCs(prev => new Set(Array.from(prev).concat(plcId)));
+    connectMutation.mutate(plcId);
   };
 
   const handleDisconnectPLC = (plcId: string) => {
-    console.log(`Disconnecting PLC ${plcId}`);
-    setPLCs(prev => 
-      prev.map(plc => 
-        plc.id === plcId 
-          ? { ...plc, is_connected: false, status: "maintenance" as const }
-          : plc
-      )
-    );
-    setSelectedPLCs(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(plcId);
-      return newSet;
-    });
+    disconnectMutation.mutate(plcId);
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const blob = await api.exportCSV();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `node_data_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Export Successful",
+        description: "CSV file has been downloaded",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export CSV data",
+        variant: "destructive",
+      });
+    }
   };
 
   const connectedPLCs = plcs.filter(plc => selectedPLCs.has(plc.id));
@@ -156,17 +246,26 @@ export default function Dashboard() {
 
               {connectedPLCs.length > 0 ? (
                 <LiveDataTable 
-                  data={mockNodeData}
-                  onExportCSV={() => console.log('Export CSV from dashboard')}
-                  onRefresh={() => console.log('Refresh data from dashboard')}
+                  data={nodeData}
+                  onExportCSV={handleExportCSV}
+                  onRefresh={() => {
+                    queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+                    toast({
+                      title: "Data Refreshed",
+                      description: "PLC data has been updated",
+                    });
+                  }}
                 />
               ) : (
                 <div className="text-center py-24 text-muted-foreground">
                   <div className="space-y-4">
-                    <h3 className="text-xl font-medium">No PLCs Connected</h3>
+                    <h3 className="text-xl font-medium">
+                      {isLoading ? "Loading PLCs..." : plcs.length === 0 ? "No PLCs Available" : "No PLCs Connected"}
+                    </h3>
                     <p className="text-sm max-w-md mx-auto">
-                      Connect to one or more PLCs from the sidebar to start monitoring live data.
-                      You can also add new PLC configurations using the "Add New" button.
+                      {isLoading ? "Please wait while we load your PLC configurations..." :
+                       plcs.length === 0 ? "Add new PLC configurations using the \"Add New\" button to get started." :
+                       "Connect to one or more PLCs from the sidebar to start monitoring live data."}
                     </p>
                   </div>
                 </div>

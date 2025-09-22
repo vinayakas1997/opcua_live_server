@@ -5,8 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
-import { plcConfigSchema, type PLCConfig } from "@shared/schema";
-import { z } from "zod";
+import { type PLCConfig } from "@shared/schema";
+import { api } from "@/lib/api";
 
 interface JsonUploaderProps {
   onConfigUploaded: (config: PLCConfig) => void;
@@ -24,20 +24,12 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
     setError(null);
     
     try {
-      const text = await file.text();
-      const json = JSON.parse(text);
-      const config = plcConfigSchema.parse(json);
-      
-      setUploadedConfig(config);
-      console.log('JSON config validated successfully:', config);
+      const result = await api.uploadJSONConfig(file);
+      setUploadedConfig(result.config);
+      console.log('JSON config validated successfully:', result.config);
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        setError(`Validation error: ${err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`);
-      } else if (err instanceof SyntaxError) {
-        setError('Invalid JSON format');
-      } else {
-        setError('Failed to process file');
-      }
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process file';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
