@@ -5,7 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
-import { type PLCConfig } from "@shared/schema";
+import { type PLCConfig, type RawJSONData, rawJSONSchema } from "@shared/schema";
+import { normalizePLCConfig } from "@shared/normalization";
 import { api } from "@/lib/api";
 
 interface JsonUploaderProps {
@@ -15,7 +16,7 @@ interface JsonUploaderProps {
 
 export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadedConfig, setUploadedConfig] = useState<PLCConfig | null>(null);
+  const [uploadedConfigs, setUploadedConfigs] = useState<PLCConfig[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -24,12 +25,35 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
     setError(null);
     
     try {
-      const result = await api.uploadJSONConfig(file);
-      setUploadedConfig(result.config);
-      console.log('JSON config validated successfully:', result.config);
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const validatedData = rawJSONSchema.parse(json);
+      const normalizedPLCs = normalizePLCConfig(validatedData);
+      
+      // Convert to API format for backend compatibility
+      const apiConfigs: PLCConfig[] = normalizedPLCs.map(plc => ({
+        plc_name: plc.plc_name,
+        plc_no: plc.plc_no,
+        plc_ip: plc.plc_ip,
+        opcua_url: plc.opcua_url,
+        address_mappings: plc.variables
+          .filter(v => !v.parentId) // Only parent variables
+          .map(v => ({
+            node_name: v.opcua_reg_add,
+            node_id: v.id,
+            description: v.description,
+            data_type: v.data_type,
+          })),
+      }));
+      
+      setUploadedConfigs(apiConfigs);
+      console.log('JSON config validated and normalized successfully:', apiConfigs);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to process file';
-      setError(errorMessage);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to process file');
+      }
     } finally {
       setIsProcessing(false);
     }

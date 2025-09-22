@@ -1,9 +1,35 @@
 import { z } from "zod";
 
-// PLC Configuration Schema
+// Raw JSON PLC Configuration Schema (as uploaded)
+export const rawPLCConfigSchema = z.object({
+  plc_name: z.string().min(1, "PLC name is required"),
+  plc_ip: z.string().ip("Invalid IP address"),
+  opcua_url: z.string().url("Invalid OPC UA URL"),
+  address_mappings: z.array(z.object({
+    plc_reg_add: z.string(),
+    data_type: z.enum(["channel", "bool"]),
+    opcua_reg_add: z.string(),
+    description: z.string(),
+    metadata: z.object({
+      bit_count: z.number(),
+      bit_mappings: z.record(z.object({
+        address: z.string(),
+        description: z.string(),
+        bit_position: z.number(),
+      })),
+    }).optional(),
+  })),
+});
+
+// Raw JSON file structure
+export const rawJSONSchema = z.object({
+  plcs: z.array(rawPLCConfigSchema),
+});
+
+// Internal PLC Configuration Schema (for API)
 export const plcConfigSchema = z.object({
   plc_name: z.string().min(1, "PLC name is required"),
-  plc_no: z.number().int().positive("PLC number must be positive"),
+  plc_no: z.number().int().positive("PLC number must be positive").optional(),
   plc_ip: z.string().ip("Invalid IP address"),
   opcua_url: z.string().url("Invalid OPC UA URL"),
   address_mappings: z.array(z.object({
@@ -42,6 +68,8 @@ export const serverStatusSchema = z.object({
   node_count: z.number().optional(),
 });
 
+export type RawPLCConfig = z.infer<typeof rawPLCConfigSchema>;
+export type RawJSONData = z.infer<typeof rawJSONSchema>;
 export type PLCConfig = z.infer<typeof plcConfigSchema>;
 export type PLC = z.infer<typeof plcSchema>;
 export type NodeData = z.infer<typeof nodeDataSchema>;
