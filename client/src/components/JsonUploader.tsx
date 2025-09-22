@@ -16,7 +16,7 @@ interface JsonUploaderProps {
 
 export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadedConfigs, setUploadedConfigs] = useState<PLCConfig[] | null>(null);
+  const [uploadedConfig, setUploadedConfig] = useState<PLCConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -30,24 +30,28 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
       const validatedData = rawJSONSchema.parse(json);
       const normalizedPLCs = normalizePLCConfig(validatedData);
       
-      // Convert to API format for backend compatibility
-      const apiConfigs: PLCConfig[] = normalizedPLCs.map(plc => ({
-        plc_name: plc.plc_name,
-        plc_no: plc.plc_no,
-        plc_ip: plc.plc_ip,
-        opcua_url: plc.opcua_url,
-        address_mappings: plc.variables
-          .filter(v => !v.parentId) // Only parent variables
-          .map(v => ({
-            node_name: v.opcua_reg_add,
-            node_id: v.id,
-            description: v.description,
-            data_type: v.data_type,
-          })),
-      }));
-      
-      setUploadedConfigs(apiConfigs);
-      console.log('JSON config validated and normalized successfully:', apiConfigs);
+      // For now, take the first PLC for single config handling
+      const firstNormalizedPLC = normalizedPLCs[0];
+      if (firstNormalizedPLC) {
+        const apiConfig: PLCConfig = {
+          plc_name: firstNormalizedPLC.plc_name,
+          // Only include plc_no if it's a positive number, otherwise omit it (it's optional)
+          ...(firstNormalizedPLC.plc_no && firstNormalizedPLC.plc_no > 0 ? { plc_no: firstNormalizedPLC.plc_no } : {}),
+          plc_ip: firstNormalizedPLC.plc_ip,
+          opcua_url: firstNormalizedPLC.opcua_url,
+          address_mappings: firstNormalizedPLC.variables
+            .filter(v => !v.parentId) // Only parent variables
+            .map(v => ({
+              node_name: v.opcua_reg_add,
+              node_id: v.id,
+              description: v.description || undefined,
+              data_type: v.data_type || undefined,
+            })),
+        };
+        
+        setUploadedConfig(apiConfig);
+        console.log('JSON config validated and normalized successfully:', apiConfig);
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

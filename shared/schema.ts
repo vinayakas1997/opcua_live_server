@@ -7,7 +7,7 @@ export const rawPLCConfigSchema = z.object({
   opcua_url: z.string().url("Invalid OPC UA URL"),
   address_mappings: z.array(z.object({
     plc_reg_add: z.string(),
-    data_type: z.enum(["channel", "bool"]),
+    data_type: z.string(), // Accept any string data type (word, bool, channel, udint, etc.)
     opcua_reg_add: z.string(),
     description: z.string(),
     metadata: z.object({

@@ -1,4 +1,4 @@
-import { type PLC, type PLCConfig, type NodeData, type ServerStatus } from "@shared/schema";
+import { type PLC, type PLCConfig, type NodeData, type ServerStatus, mockPLCs } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 // Storage interface for OPC UA Dashboard
@@ -29,11 +29,9 @@ export class MemStorage implements IStorage {
     this.nodeData = new Map();
     this.serverStatuses = new Map();
     
-    // Initialize with mock PLCs from schema
-    import("@shared/schema").then(({ mockPLCs }) => {
-      mockPLCs.forEach(plc => {
-        this.plcs.set(plc.id, plc);
-      });
+    // Initialize with mock PLCs from schema (synchronous)
+    mockPLCs.forEach(plc => {
+      this.plcs.set(plc.id, plc);
     });
   }
 

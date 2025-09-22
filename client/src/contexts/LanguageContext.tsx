@@ -77,6 +77,7 @@ const translations = {
     plcAdded: "PLC Added",
     plcAddedSuccess: "Successfully added new PLC configuration",
     plcAddFailed: "Failed to Add PLC",
+    dataRefreshed: "Data has been refreshed",
     
     // Language selector
     language: "Language",
@@ -98,6 +99,13 @@ const translations = {
     connectionFailed: "Connection failed",
     invalidFile: "Invalid file format",
     uploadFailed: "Upload failed",
+    
+    // Variables table
+    variables: "Variables",
+    selected: "Selected",
+    showAll: "Show All",
+    showSelected: "Show Selected",
+    noMatchingVariables: "No matching variables found",
   },
   jp: {
     // Navigation
@@ -173,6 +181,7 @@ const translations = {
     plcAdded: "PLC追加",
     plcAddedSuccess: "新しいPLC設定を正常に追加しました",
     plcAddFailed: "PLC追加に失敗しました",
+    dataRefreshed: "データが更新されました",
     
     // Language selector
     language: "言語",
@@ -194,6 +203,13 @@ const translations = {
     connectionFailed: "接続に失敗しました",
     invalidFile: "無効なファイル形式",
     uploadFailed: "アップロードに失敗しました",
+    
+    // Variables table
+    variables: "変数",
+    selected: "選択済み",
+    showAll: "すべて表示",
+    showSelected: "選択済みを表示",
+    noMatchingVariables: "一致する変数が見つかりません",
   },
 } as const;
 

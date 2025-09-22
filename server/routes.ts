@@ -40,6 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(plc);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("PLC validation error:", error.errors);
         return res.status(400).json({ error: "Invalid PLC configuration", details: error.errors });
       }
       console.error("Error creating PLC:", error);
