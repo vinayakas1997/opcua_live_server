@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
@@ -13,18 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { 
   Search, 
   Download, 
   RefreshCw, 
   ChevronDown, 
   ChevronRight,
-  Filter,
   Eye,
   EyeOff 
 } from "lucide-react";
@@ -145,49 +138,52 @@ export default function EnhancedVariablesTable({
   const totalVariables = variables.length;
 
   return (
-    <Card data-testid="card-enhanced-variables">
-      <CardHeader>
+    <div className="space-y-6" data-testid="enhanced-variables-table">
+      {/* Header Section */}
+      <div className="space-y-4">
+        {/* Title and Actions */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CardTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
               {t("realTimeData")}
               <Badge variant="outline" className="font-mono text-xs">
                 {totalVariables} {t("variables")}
               </Badge>
               {selectedCount > 0 && (
-                <Badge variant="default" className="font-mono text-xs">
+                <Badge variant="default" className="font-mono text-xs bg-primary">
                   {selectedCount} {t("selected")}
                 </Badge>
               )}
-            </CardTitle>
+            </h2>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              data-testid="button-refresh-variables"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
             
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                data-testid="button-refresh-variables"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </Button>
-              
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={onExportCSV}
-                className="bg-green-600 text-white"
-                data-testid="button-export-variables"
-              >
-                <Download className="h-4 w-4 mr-1" />
-                CSV
-              </Button>
-            </div>
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={onExportCSV}
+              className="bg-green-600 text-white"
+              data-testid="button-export-variables"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              CSV
+            </Button>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
+        {/* Search and Filter */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={`${t("search")} ${t("variables").toLowerCase()}...`}
@@ -209,9 +205,10 @@ export default function EnhancedVariablesTable({
             {showSelectedOnly ? t("showAll") : t("showSelected")}
           </Button>
         </div>
-      </CardHeader>
-      
-      <CardContent>
+      </div>
+
+      {/* Table Section */}
+      <div className="border rounded-lg bg-background">
         <ScrollArea className="h-[600px]">
           <Table>
             <TableHeader>
@@ -234,12 +231,8 @@ export default function EnhancedVariablesTable({
                 const hasChildren = variable.type === 'channel' && childVariables.length > 0;
                 
                 return (
-                  <Collapsible 
-                    key={variable.id} 
-                    open={isExpanded} 
-                    onOpenChange={() => hasChildren && toggleChannelExpanded(variable.id)}
-                  >
-                    <TableRow className="group">
+                  <React.Fragment key={variable.id}>
+                    <TableRow key={variable.id} className="group">
                       <TableCell>
                         <Checkbox
                           checked={isSelected}
@@ -253,20 +246,20 @@ export default function EnhancedVariablesTable({
                       </TableCell>
                       <TableCell>
                         {hasChildren && (
-                          <CollapsibleTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              data-testid={`button-expand-${variable.id}`}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </CollapsibleTrigger>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={() => toggleChannelExpanded(variable.id)}
+                            aria-expanded={isExpanded}
+                            data-testid={`button-expand-${variable.id}`}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
@@ -289,56 +282,50 @@ export default function EnhancedVariablesTable({
                       </TableCell>
                     </TableRow>
                     
-                    {hasChildren && (
-                      <CollapsibleContent asChild>
-                        <>
-                          {childVariables.map((childVariable, index) => {
-                            const isChildSelected = selectedVariables.has(childVariable.id);
-                            
-                            return (
-                              <TableRow 
-                                key={childVariable.id}
-                                className="bg-muted/20 border-l-2 border-l-primary/20"
-                              >
-                                <TableCell>
-                                  <Checkbox
-                                    checked={isChildSelected}
-                                    onCheckedChange={(checked) => 
-                                      handleVariableSelect(childVariable.id, checked as boolean)
-                                    }
-                                    data-testid={`checkbox-child-${childVariable.id}`}
-                                  />
-                                </TableCell>
-                                <TableCell className="pl-8">
-                                  <Badge variant="outline" className="text-xs">
-                                    {childVariable.bitPosition}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="font-medium text-sm pl-8">
-                                  {childVariable.opcua_reg_add}
-                                </TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
-                                  {childVariable.description}
-                                </TableCell>
-                                <TableCell className="font-mono font-medium">
-                                  {getVariableValue(childVariable)}
-                                </TableCell>
-                                <TableCell>
-                                  {getDataTypeBadge(childVariable)}
-                                </TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground">
-                                  {childVariable.plc_reg_add}
-                                </TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground">
-                                  {childVariable.opcua_reg_add}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </>
-                      </CollapsibleContent>
-                    )}
-                  </Collapsible>
+                    {hasChildren && isExpanded && childVariables.map((childVariable, index) => {
+                      const isChildSelected = selectedVariables.has(childVariable.id);
+                      
+                      return (
+                        <TableRow 
+                          key={childVariable.id}
+                          className="bg-muted/20 border-l-2 border-l-primary/20"
+                        >
+                          <TableCell>
+                            <Checkbox
+                              checked={isChildSelected}
+                              onCheckedChange={(checked) => 
+                                handleVariableSelect(childVariable.id, checked as boolean)
+                              }
+                              data-testid={`checkbox-child-${childVariable.id}`}
+                            />
+                          </TableCell>
+                          <TableCell className="pl-8">
+                            <Badge variant="outline" className="text-xs">
+                              {childVariable.bitPosition}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium text-sm pl-8">
+                            {childVariable.opcua_reg_add}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {childVariable.description}
+                          </TableCell>
+                          <TableCell className="font-mono font-medium">
+                            {getVariableValue(childVariable)}
+                          </TableCell>
+                          <TableCell>
+                            {getDataTypeBadge(childVariable)}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {childVariable.plc_reg_add}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {childVariable.opcua_reg_add}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </React.Fragment>
                 );
               })}
               
@@ -352,7 +339,7 @@ export default function EnhancedVariablesTable({
             </TableBody>
           </Table>
         </ScrollArea>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
