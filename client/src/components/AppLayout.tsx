@@ -114,6 +114,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
     },
   });
 
+  // Delete PLC mutation
+  const deleteMutation = useMutation({
+    mutationFn: api.deletePLC,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      toast({
+        title: t("plcDeleted"),
+        description: t("plcDeletedSuccess"),
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: t("plcDeleteFailed"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // WebSocket connection
   useEffect(() => {
     const socket = socketManager.connect();
@@ -144,6 +163,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
     disconnectMutation.mutate(plcId);
   };
 
+  const handleDeletePLC = (plcId: string) => {
+    // Also disconnect if currently connected
+    if (selectedPLCs.has(plcId)) {
+      setSelectedPLCs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(plcId);
+        return newSet;
+      });
+      socketManager.unsubscribeFromPLC(plcId);
+    }
+    deleteMutation.mutate(plcId);
+  };
+
   // Custom sidebar width for better content layout
   const style = {
     "--sidebar-width": "20rem",       // 320px for better content
@@ -168,6 +200,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           onDisconnect={handleDisconnectPLC}
           onRefresh={(id) => console.log(`Refresh PLC ${id}`)}
           onConfigure={(id) => console.log(`Configure PLC ${id}`)}
+          onDelete={handleDeletePLC}
         />
         <div className="flex flex-col flex-1">
           <header className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

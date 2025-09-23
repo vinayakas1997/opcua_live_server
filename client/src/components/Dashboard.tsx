@@ -200,16 +200,16 @@ export default function Dashboard() {
 
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
-              {selectedPLC ? `${selectedPLC.plc_name} Variables` : "OPC UA Dashboard"}
-            </h1>
-            <div className="text-sm text-muted-foreground mt-1" data-testid="text-plcs-connected">
+          <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
+            {selectedPLC ? `${selectedPLC.plc_name} Variables` : "OPC UA Dashboard"}
+          </h1>
+          <div className="text-right">
+            <div className="text-sm text-muted-foreground" data-testid="text-plcs-connected">
               {connectedPLCs.length}/{plcs.length} PLCs Connected
             </div>
-          </div>
-          <div className="text-sm text-muted-foreground" data-testid="text-last-updated">
-            {t("lastUpdated")}: {new Date().toLocaleTimeString()}
+            <div className="text-sm text-muted-foreground" data-testid="text-last-updated">
+              {t("lastUpdated")}: {new Date().toLocaleTimeString()}
+            </div>
           </div>
         </div>
       </div>

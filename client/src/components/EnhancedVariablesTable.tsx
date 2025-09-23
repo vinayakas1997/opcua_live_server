@@ -216,14 +216,14 @@ export default function EnhancedVariablesTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-8"></TableHead>
-                <TableHead className="w-8"></TableHead>
-                <TableHead>{t("name")}</TableHead>
-                <TableHead>{t("description")}</TableHead>
-                <TableHead>{t("value")}</TableHead>
-                <TableHead>{t("type")}</TableHead>
-                <TableHead>{t("address")}</TableHead>
-                <TableHead>{t("nodeId")}</TableHead>
+                <TableHead className="w-8 text-left"></TableHead>
+                <TableHead className="w-8 text-left"></TableHead>
+                <TableHead className="text-left">{t("name")}</TableHead>
+                <TableHead className="text-left">{t("description")}</TableHead>
+                <TableHead className="text-left">{t("value")}</TableHead>
+                <TableHead className="text-left">{t("type")}</TableHead>
+                <TableHead className="text-left">{t("address")}</TableHead>
+                <TableHead className="text-left">{t("nodeId")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody data-testid="table-variables-body">

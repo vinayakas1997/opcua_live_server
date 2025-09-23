@@ -22,9 +22,17 @@ import {
   RefreshCw, 
   Wifi,
   WifiOff,
-  ArrowUpDown
+  ArrowUpDown,
+  Trash2,
+  MoreHorizontal
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import StatusIndicator from "./StatusIndicator";
 import type { PLC } from "@shared/schema";
 
@@ -35,6 +43,7 @@ interface AppSidebarProps {
   onDisconnect: (plcId: string) => void;
   onRefresh: (plcId: string) => void;
   onConfigure: (plcId: string) => void;
+  onDelete: (plcId: string) => void;
 }
 
 export function AppSidebar({ 
@@ -43,7 +52,8 @@ export function AppSidebar({
   onConnect, 
   onDisconnect, 
   onRefresh, 
-  onConfigure 
+  onConfigure,
+  onDelete
 }: AppSidebarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -51,11 +61,13 @@ export function AppSidebar({
   const filteredAndSortedPLCs = plcs
     .filter(plc => 
       plc.plc_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plc.plc_no.toString().includes(searchTerm) ||
+      (plc.plc_no?.toString() || '').includes(searchTerm) ||
       plc.plc_ip.includes(searchTerm)
     )
     .sort((a, b) => {
-      const comparison = sortOrder === "asc" ? a.plc_no - b.plc_no : b.plc_no - a.plc_no;
+      const aNum = a.plc_no || 0;
+      const bNum = b.plc_no || 0;
+      const comparison = sortOrder === "asc" ? aNum - bNum : bNum - aNum;
       return comparison;
     });
 
@@ -185,18 +197,44 @@ export function AppSidebar({
                                   >
                                     <RefreshCw className="h-3 w-3" />
                                   </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 text-xs"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onConfigure(plc.id);
-                                    }}
-                                    data-testid={`button-configure-sidebar-${plc.id}`}
-                                  >
-                                    <Settings className="h-3 w-3" />
-                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-6 text-xs"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                        }}
+                                        data-testid={`button-configure-sidebar-${plc.id}`}
+                                      >
+                                        <MoreHorizontal className="h-3 w-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-40">
+                                      <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onConfigure(plc.id);
+                                        }}
+                                        data-testid={`menu-configure-${plc.id}`}
+                                      >
+                                        <Settings className="h-3 w-3 mr-2" />
+                                        Configure
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onDelete(plc.id);
+                                        }}
+                                        className="text-red-600 focus:text-red-600"
+                                        data-testid={`menu-delete-${plc.id}`}
+                                      >
+                                        <Trash2 className="h-3 w-3 mr-2" />
+                                        Delete PLC
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
                             )}

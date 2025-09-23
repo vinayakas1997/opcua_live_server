@@ -77,6 +77,9 @@ const translations = {
     plcAdded: "PLC Added",
     plcAddedSuccess: "Successfully added new PLC configuration",
     plcAddFailed: "Failed to Add PLC",
+    plcDeleted: "PLC Deleted",
+    plcDeletedSuccess: "Successfully deleted PLC configuration",
+    plcDeleteFailed: "Failed to Delete PLC",
     dataRefreshed: "Data has been refreshed",
     
     // Language selector
@@ -181,6 +184,9 @@ const translations = {
     plcAdded: "PLC追加",
     plcAddedSuccess: "新しいPLC設定を正常に追加しました",
     plcAddFailed: "PLC追加に失敗しました",
+    plcDeleted: "PLC削除",
+    plcDeletedSuccess: "PLC設定を正常に削除しました",
+    plcDeleteFailed: "PLC削除に失敗しました",
     dataRefreshed: "データが更新されました",
     
     // Language selector
