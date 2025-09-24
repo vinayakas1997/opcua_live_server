@@ -70,7 +70,7 @@ export default function PLCListItem({
               <TooltipTrigger asChild>
                 <div className="space-y-1">
                   <p className="font-mono text-sm font-medium text-foreground">
-                    P_{plc.plc_no}_{truncatedName}
+                    {`P_${plc.plc_no}_${truncatedName}`}
                   </p>
                   <p className="text-xs text-muted-foreground font-mono">
                     {plc.plc_ip}
@@ -79,7 +79,7 @@ export default function PLCListItem({
               </TooltipTrigger>
               {plc.plc_name.length > 25 && (
                 <TooltipContent>
-                  <p className="font-mono">P_{plc.plc_no}_{plc.plc_name}</p>
+                  <p className="font-mono">{`P_${plc.plc_no}_${plc.plc_name}`}</p>
                 </TooltipContent>
               )}
             </Tooltip>
