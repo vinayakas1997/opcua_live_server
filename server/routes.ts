@@ -156,6 +156,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Description Routes
+  app.get("/api/plcs/:plcId/descriptions/:nodeId", async (req, res) => {
+    try {
+      const { plcId, nodeId } = req.params;
+      const description = await storage.getUserDescription(plcId, nodeId);
+      if (!description) {
+        return res.status(404).json({ error: "User description not found" });
+      }
+      res.json(description);
+    } catch (error) {
+      console.error("Error fetching user description:", error);
+      res.status(500).json({ error: "Failed to fetch user description" });
+    }
+  });
+
+  app.post("/api/plcs/:plcId/descriptions/:nodeId", async (req, res) => {
+    try {
+      const { plcId, nodeId } = req.params;
+      const { description } = req.body;
+      
+      if (typeof description !== 'string') {
+        return res.status(400).json({ error: "Description must be a string" });
+      }
+      
+      const userDescription = await storage.saveUserDescription(plcId, nodeId, description);
+      res.json(userDescription);
+    } catch (error) {
+      console.error("Error saving user description:", error);
+      res.status(500).json({ error: "Failed to save user description" });
+    }
+  });
+
+  app.get("/api/plcs/:plcId/descriptions", async (req, res) => {
+    try {
+      const { plcId } = req.params;
+      const descriptions = await storage.getAllUserDescriptions(plcId);
+      res.json(descriptions);
+    } catch (error) {
+      console.error("Error fetching user descriptions:", error);
+      res.status(500).json({ error: "Failed to fetch user descriptions" });
+    }
+  });
+
   // Data Export Route
   app.get("/api/export/csv", async (req, res) => {
     try {

@@ -19,7 +19,9 @@ import {
   ChevronDown, 
   ChevronRight,
   Eye,
-  EyeOff 
+  EyeOff,
+  Save,
+  Check
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { 
@@ -46,6 +48,9 @@ export default function EnhancedVariablesTable({
   const [expandedChannels, setExpandedChannels] = useState<Set<string>>(new Set());
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [userDescriptions, setUserDescriptions] = useState<Map<string, string>>(new Map());
+  const [editingDescriptions, setEditingDescriptions] = useState<Set<string>>(new Set());
+  const [savingDescriptions, setSavingDescriptions] = useState<Set<string>>(new Set());
 
   // Debug logging (cleaned up for production)
   // console.log('EnhancedVariablesTable - plc:', plc);
@@ -131,6 +136,134 @@ export default function EnhancedVariablesTable({
       <Badge variant={variant} className="text-xs">
         {variable.type === 'bool' ? t("bool") : t("channel")}
       </Badge>
+    );
+  };
+
+  // Load user descriptions when PLC changes
+  useEffect(() => {
+    if (plc?.id) {
+      loadUserDescriptions();
+    }
+  }, [plc?.id]);
+
+  const loadUserDescriptions = async () => {
+    if (!plc?.id) return;
+    
+    try {
+      const response = await fetch(`/api/plcs/${plc.id}/descriptions`);
+      if (response.ok) {
+        const descriptions = await response.json();
+        const descMap = new Map();
+        descriptions.forEach((desc: any) => {
+          descMap.set(desc.node_id, desc.user_description);
+        });
+        setUserDescriptions(descMap);
+      }
+    } catch (error) {
+      console.error('Failed to load user descriptions:', error);
+    }
+  };
+
+  const handleDescriptionEdit = (nodeId: string) => {
+    const newEditing = new Set(editingDescriptions);
+    newEditing.add(nodeId);
+    setEditingDescriptions(newEditing);
+  };
+
+  const handleDescriptionSave = async (nodeId: string, description: string) => {
+    if (!plc?.id) return;
+    
+    const newSaving = new Set(savingDescriptions);
+    newSaving.add(nodeId);
+    setSavingDescriptions(newSaving);
+
+    try {
+      const response = await fetch(`/api/plcs/${plc.id}/descriptions/${encodeURIComponent(nodeId)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (response.ok) {
+        const newDescriptions = new Map(userDescriptions);
+        newDescriptions.set(nodeId, description);
+        setUserDescriptions(newDescriptions);
+        
+        const newEditing = new Set(editingDescriptions);
+        newEditing.delete(nodeId);
+        setEditingDescriptions(newEditing);
+      }
+    } catch (error) {
+      console.error('Failed to save user description:', error);
+    } finally {
+      const newSaving = new Set(savingDescriptions);
+      newSaving.delete(nodeId);
+      setSavingDescriptions(newSaving);
+    }
+  };
+
+  const handleDescriptionCancel = (nodeId: string) => {
+    const newEditing = new Set(editingDescriptions);
+    newEditing.delete(nodeId);
+    setEditingDescriptions(newEditing);
+  };
+
+  const renderUserDescriptionCell = (variable: NormalizedVariable) => {
+    const nodeId = variable.opcua_reg_add;
+    const isEditing = editingDescriptions.has(nodeId);
+    const isSaving = savingDescriptions.has(nodeId);
+    const currentDescription = userDescriptions.get(nodeId) || '';
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-2">
+          <Input
+            defaultValue={currentDescription}
+            placeholder="Enter user description..."
+            className="h-8 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleDescriptionSave(nodeId, e.currentTarget.value);
+              } else if (e.key === 'Escape') {
+                handleDescriptionCancel(nodeId);
+              }
+            }}
+            autoFocus
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            onClick={(e) => {
+              const input = e.currentTarget.parentElement?.querySelector('input');
+              if (input) {
+                handleDescriptionSave(nodeId, input.value);
+              }
+            }}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <RefreshCw className="h-3 w-3 animate-spin" />
+            ) : (
+              <Check className="h-3 w-3" />
+            )}
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div 
+        className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded min-h-[24px] flex items-center"
+        onClick={() => handleDescriptionEdit(nodeId)}
+        title="Click to edit user description"
+      >
+        {currentDescription || (
+          <span className="text-muted-foreground italic">Click to add description...</span>
+        )}
+      </div>
     );
   };
 

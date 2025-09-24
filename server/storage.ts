@@ -1,4 +1,4 @@
-import { type PLC, type PLCConfig, type NodeData, type ServerStatus, mockPLCs } from "@shared/schema";
+import { type PLC, type PLCConfig, type NodeData, type ServerStatus, type UserDescription, mockPLCs } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 // Storage interface for OPC UA Dashboard
@@ -17,17 +17,24 @@ export interface IStorage {
   // Server status management
   getServerStatuses(): Promise<ServerStatus[]>;
   updateServerStatus(opcuaUrl: string, status: ServerStatus): Promise<void>;
+  
+  // User descriptions management
+  getUserDescription(plcId: string, nodeId: string): Promise<UserDescription | undefined>;
+  saveUserDescription(plcId: string, nodeId: string, description: string): Promise<UserDescription>;
+  getAllUserDescriptions(plcId: string): Promise<UserDescription[]>;
 }
 
 export class MemStorage implements IStorage {
   private plcs: Map<string, PLC>;
   private nodeData: Map<string, NodeData[]>;
   private serverStatuses: Map<string, ServerStatus>;
+  private userDescriptions: Map<string, UserDescription>;
 
   constructor() {
     this.plcs = new Map();
     this.nodeData = new Map();
     this.serverStatuses = new Map();
+    this.userDescriptions = new Map();
     
     // Initialize with mock PLCs from schema (synchronous)
     mockPLCs.forEach(plc => {
@@ -84,6 +91,33 @@ export class MemStorage implements IStorage {
 
   async updateServerStatus(opcuaUrl: string, status: ServerStatus): Promise<void> {
     this.serverStatuses.set(opcuaUrl, status);
+  }
+
+  async getUserDescription(plcId: string, nodeId: string): Promise<UserDescription | undefined> {
+    const key = `${plcId}-${nodeId}`;
+    return this.userDescriptions.get(key);
+  }
+
+  async saveUserDescription(plcId: string, nodeId: string, description: string): Promise<UserDescription> {
+    const key = `${plcId}-${nodeId}`;
+    const existing = this.userDescriptions.get(key);
+    const now = new Date();
+    
+    const userDescription: UserDescription = {
+      id: existing?.id || randomUUID(),
+      plc_id: plcId,
+      node_id: nodeId,
+      user_description: description,
+      created_at: existing?.created_at || now,
+      updated_at: now,
+    };
+    
+    this.userDescriptions.set(key, userDescription);
+    return userDescription;
+  }
+
+  async getAllUserDescriptions(plcId: string): Promise<UserDescription[]> {
+    return Array.from(this.userDescriptions.values()).filter(desc => desc.plc_id === plcId);
   }
 }
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 // Raw JSON PLC Configuration Schema (as uploaded)
 export const rawPLCConfigSchema = z.object({
   plc_name: z.string().min(1, "PLC name is required"),
+  plc_no: z.number().int().positive("PLC number must be positive"),
   plc_ip: z.string().ip("Invalid IP address"),
   opcua_url: z.string().url("Invalid OPC UA URL"),
   address_mappings: z.array(z.object({
@@ -10,6 +11,7 @@ export const rawPLCConfigSchema = z.object({
     data_type: z.string(), // Accept any string data type (word, bool, channel, udint, etc.)
     opcua_reg_add: z.string(),
     description: z.string(),
+    Memory_Area: z.string().optional(),
     metadata: z.object({
       bit_count: z.number(),
       bit_mappings: z.record(z.object({
@@ -68,12 +70,23 @@ export const serverStatusSchema = z.object({
   node_count: z.number().optional(),
 });
 
+// User Description Schema for storing custom descriptions
+export const userDescriptionSchema = z.object({
+  id: z.string(),
+  plc_id: z.string(),
+  node_id: z.string(),
+  user_description: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
+});
+
 export type RawPLCConfig = z.infer<typeof rawPLCConfigSchema>;
 export type RawJSONData = z.infer<typeof rawJSONSchema>;
 export type PLCConfig = z.infer<typeof plcConfigSchema>;
 export type PLC = z.infer<typeof plcSchema>;
 export type NodeData = z.infer<typeof nodeDataSchema>;
 export type ServerStatus = z.infer<typeof serverStatusSchema>;
+export type UserDescription = z.infer<typeof userDescriptionSchema>;
 export type PLCStatus = "active" | "maintenance" | "error";
 export type ConnectionStatus = "active" | "inactive" | "error";
 
