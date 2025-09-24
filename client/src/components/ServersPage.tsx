@@ -45,9 +45,8 @@ const groupPLCsByServer = (plcs: PLC[]) => {
 export default function ServersPage() {
   const [expandedServers, setExpandedServers] = useState<Set<string>>(new Set());
   
-  const { data: plcs = [], isLoading } = useQuery({
-    queryKey: ["/api/plcs"],
-    queryFn: api.getAllPLCs,
+  const { data: plcs = [], isLoading } = useQuery<PLC[]>({
+    queryKey: ['api', 'plcs'],
   });
 
   const servers = groupPLCsByServer(plcs);

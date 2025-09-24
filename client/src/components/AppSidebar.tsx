@@ -38,6 +38,7 @@ import type { PLC } from "@shared/schema";
 
 interface AppSidebarProps {
   plcs: PLC[];
+  isLoading?: boolean;
   selectedPLCs: Set<string>;
   onConnect: (plcId: string) => void;
   onDisconnect: (plcId: string) => void;
@@ -48,6 +49,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ 
   plcs, 
+  isLoading = false,
   selectedPLCs, 
   onConnect, 
   onDisconnect, 
@@ -70,6 +72,7 @@ export function AppSidebar({
       const comparison = sortOrder === "asc" ? aNum - bNum : bNum - aNum;
       return comparison;
     });
+
 
   const connectedCount = plcs.filter(plc => selectedPLCs.has(plc.id)).length;
   const activeCount = plcs.filter(plc => plc.status === "active").length;
@@ -174,7 +177,9 @@ export function AppSidebar({
                               
                               <div className="flex items-center gap-1 shrink-0">
                                 {isConnected ? (
-                                  <Wifi className="h-3 w-3 text-green-600" />
+                                  <Wifi className={`h-3 w-3 ${
+                                    plc.status === 'maintenance' ? 'text-yellow-600' : 'text-green-600'
+                                  }`} />
                                 ) : (
                                   <WifiOff className="h-3 w-3 text-muted-foreground" />
                                 )}
@@ -254,14 +259,18 @@ export function AppSidebar({
                 })}
               </SidebarMenu>
               
-              {filteredAndSortedPLCs.length === 0 && (
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-xs">Loading PLCs...</p>
+                </div>
+              ) : filteredAndSortedPLCs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p className="text-xs">No PLCs found</p>
                   <p className="text-xs mt-1">
                     {searchTerm ? "Try different search terms" : "Add new PLCs to get started"}
                   </p>
                 </div>
-              )}
+              ) : null}
             </ScrollArea>
           </SidebarGroupContent>
         </SidebarGroup>

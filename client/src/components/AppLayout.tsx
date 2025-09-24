@@ -44,16 +44,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const currentPage = location === '/servers' ? 'servers' : 'dashboard';
 
   // Fetch PLCs
-  const { data: plcs = [] } = useQuery({
-    queryKey: ["/api/plcs"],
-    queryFn: api.getAllPLCs,
+  const { data: plcs = [], isLoading, error } = useQuery({
+    queryKey: ['api', 'plcs'],
   });
 
   // Connect PLC mutation
   const connectMutation = useMutation({
     mutationFn: api.connectPLC,
     onSuccess: (updatedPLC) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
       setSelectedPLCs(prev => new Set(Array.from(prev).concat(updatedPLC.id)));
       socketManager.subscribeToPLC(updatedPLC.id);
       toast({
@@ -74,7 +73,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const disconnectMutation = useMutation({
     mutationFn: api.disconnectPLC,
     onSuccess: (updatedPLC) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
       setSelectedPLCs(prev => {
         const newSet = new Set(prev);
         newSet.delete(updatedPLC.id);
@@ -99,7 +98,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const createMutation = useMutation({
     mutationFn: api.createPLC,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
       toast({
         title: t("plcAdded"),
         description: t("plcAddedSuccess"),
@@ -118,7 +117,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const deleteMutation = useMutation({
     mutationFn: api.deletePLC,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });
+      queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
       toast({
         title: t("plcDeleted"),
         description: t("plcDeletedSuccess"),
@@ -142,7 +141,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     });
 
     socket.on("plcs", (data: PLC[]) => {
-      queryClient.setQueryData(["/api/plcs"], data);
+      queryClient.setQueryData(['api', 'plcs'], data);
     });
 
     return () => {
@@ -195,6 +194,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="flex h-screen w-full">
         <AppSidebar
           plcs={plcs}
+          isLoading={isLoading}
           selectedPLCs={selectedPLCs}
           onConnect={handleConnectPLC}
           onDisconnect={handleDisconnectPLC}
