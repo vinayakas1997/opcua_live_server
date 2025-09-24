@@ -138,11 +138,11 @@ export default function LiveDataTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Node Name</TableHead>
-                <TableHead>Node ID</TableHead>
-                <TableHead>Current Value</TableHead>
-                <TableHead>Data Type</TableHead>
-                <TableHead>Quality</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Value</TableHead>
                 <TableHead>Timestamp</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>User Description</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody data-testid="table-node-data">
@@ -151,24 +151,20 @@ export default function LiveDataTable({
                   <TableCell className="font-medium">
                     {item.node_name}
                   </TableCell>
-                  <TableCell className="font-mono text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground">
                     {item.node_id}
                   </TableCell>
                   <TableCell className="font-mono font-medium">
                     {formatValue(item.current_value, item.data_type)}
                   </TableCell>
-                  <TableCell>
-                    {item.data_type && (
-                      <Badge variant="outline" className="text-xs">
-                        {item.data_type}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {getQualityBadge(item.quality)}
-                  </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
                     {item.timestamp.toLocaleTimeString()}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {item.node_id}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground italic">
+                    Click to add description...
                   </TableCell>
                 </TableRow>
               ))}

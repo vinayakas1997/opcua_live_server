@@ -58,13 +58,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       toast({
         title: t("serverConnected"),
         description: `${t("success")}: ${updatedPLC.plc_name}`,
+        variant: "success",
       });
     },
     onError: (error) => {
       toast({
         title: t("connectionFailed"),
         description: error.message,
-        variant: "destructive",
+        variant: "error",
       });
     },
   });
@@ -83,13 +84,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       toast({
         title: t("serverDisconnected"),
         description: `${t("disconnected")}: ${updatedPLC.plc_name}`,
+        variant: "warning",
       });
     },
     onError: (error) => {
       toast({
         title: t("connectionFailed"),
         description: error.message,
-        variant: "destructive",
+        variant: "error",
       });
     },
   });
@@ -102,13 +104,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       toast({
         title: t("plcAdded"),
         description: t("plcAddedSuccess"),
+        variant: "success",
       });
     },
     onError: (error) => {
       toast({
         title: t("plcAddFailed"),
         description: error.message,
-        variant: "destructive",
+        variant: "error",
       });
     },
   });
@@ -121,13 +124,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       toast({
         title: t("plcDeleted"),
         description: t("plcDeletedSuccess"),
+        variant: "success",
       });
     },
     onError: (error) => {
       toast({
         title: t("plcDeleteFailed"),
         description: error.message,
-        variant: "destructive",
+        variant: "error",
       });
     },
   });

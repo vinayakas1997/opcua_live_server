@@ -29,6 +29,8 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    // @ts-ignore
+    allowedHosts: process.env.TEMPO === "true" ? true : undefined,
     fs: {
       strict: true,
       deny: ["**/.*"],

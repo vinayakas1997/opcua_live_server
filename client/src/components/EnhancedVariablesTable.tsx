@@ -122,12 +122,16 @@ export default function EnhancedVariablesTable({
 
   const getVariableValue = (variable: NormalizedVariable) => {
     // Mock real-time values - in real implementation, this would come from live data
-    if (variable.type === 'bool') {
-      return Math.random() > 0.5 ? 'true' : 'false';
-    } else if (variable.type === 'channel') {
+    if (variable.type === "bool") {
+      return Math.random() > 0.5 ? "true" : "false";
+    } else if (variable.type === "channel") {
       return Math.floor(Math.random() * 1000).toString();
     }
-    return 'N/A';
+    return "N/A";
+  };
+
+  const getTimestamp = () => {
+    return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
   const getDataTypeBadge = (variable: NormalizedVariable) => {
@@ -348,40 +352,51 @@ export default function EnhancedVariablesTable({
               <TableRow>
                 <TableHead className="w-8 text-left"></TableHead>
                 <TableHead className="w-8 text-left"></TableHead>
-                <TableHead className="text-left">{t("name")}</TableHead>
-                <TableHead className="text-left">{t("description")}</TableHead>
+                <TableHead className="text-left">{t("nodeName")}</TableHead>
+                <TableHead className="text-left w-32">{t("description")}</TableHead>
                 <TableHead className="text-left">{t("value")}</TableHead>
-                <TableHead className="text-left">{t("type")}</TableHead>
+                <TableHead className="text-left">{t("timestamp")}</TableHead>
                 <TableHead className="text-left">{t("address")}</TableHead>
-                <TableHead className="text-left">{t("nodeId")}</TableHead>
+                <TableHead className="text-left">Data Type</TableHead>
+                <TableHead className="text-left">{t("userDescription")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody data-testid="table-variables-body">
               {filteredParentVariables.map((variable) => {
-                const childVariables = getChildVariables(variables, variable.id);
+                const childVariables = getChildVariables(
+                  variables,
+                  variable.id,
+                );
                 const isExpanded = isChannelExpanded(variable.id);
                 const isSelected = selectedVariables.has(variable.id);
-                const hasChildren = variable.type === 'channel' && childVariables.length > 0;
-                
+                const hasChildren =
+                  variable.type === "channel" && childVariables.length > 0;
+
                 return (
                   <React.Fragment key={variable.id}>
                     <TableRow key={variable.id} className="group">
                       <TableCell>
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={(checked) => 
-                            hasChildren 
-                              ? handleChannelSelect(variable.id, checked as boolean)
-                              : handleVariableSelect(variable.id, checked as boolean)
+                          onCheckedChange={(checked) =>
+                            hasChildren
+                              ? handleChannelSelect(
+                                  variable.id,
+                                  checked as boolean,
+                                )
+                              : handleVariableSelect(
+                                  variable.id,
+                                  checked as boolean,
+                                )
                           }
                           data-testid={`checkbox-variable-${variable.id}`}
                         />
                       </TableCell>
                       <TableCell>
                         {hasChildren && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="h-8 w-8 p-0"
                             onClick={() => toggleChannelExpanded(variable.id)}
                             aria-expanded={isExpanded}
@@ -398,73 +413,88 @@ export default function EnhancedVariablesTable({
                       <TableCell className="font-medium">
                         {variable.opcua_reg_add}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground w-32 truncate">
                         {variable.description}
                       </TableCell>
                       <TableCell className="font-mono font-medium">
                         {getVariableValue(variable)}
                       </TableCell>
-                      <TableCell>
-                        {getDataTypeBadge(variable)}
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {getTimestamp()}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {variable.plc_reg_add}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {variable.opcua_reg_add}
+                      <TableCell className="text-xs text-muted-foreground">
+                        {variable.type}
+                      </TableCell>
+                      <TableCell>
+                        {renderUserDescriptionCell(variable)}
                       </TableCell>
                     </TableRow>
-                    
-                    {hasChildren && isExpanded && childVariables.map((childVariable, index) => {
-                      const isChildSelected = selectedVariables.has(childVariable.id);
-                      
-                      return (
-                        <TableRow 
-                          key={childVariable.id}
-                          className="bg-muted/20 border-l-2 border-l-primary/20"
-                        >
-                          <TableCell>
-                            <Checkbox
-                              checked={isChildSelected}
-                              onCheckedChange={(checked) => 
-                                handleVariableSelect(childVariable.id, checked as boolean)
-                              }
-                              data-testid={`checkbox-child-${childVariable.id}`}
-                            />
-                          </TableCell>
-                          <TableCell className="pl-8">
-                            <Badge variant="outline" className="text-xs">
-                              {childVariable.bitPosition}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium text-sm pl-8">
-                            {childVariable.opcua_reg_add}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {childVariable.description}
-                          </TableCell>
-                          <TableCell className="font-mono font-medium">
-                            {getVariableValue(childVariable)}
-                          </TableCell>
-                          <TableCell>
-                            {getDataTypeBadge(childVariable)}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">
-                            {childVariable.plc_reg_add}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">
-                            {childVariable.opcua_reg_add}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                    {hasChildren &&
+                      isExpanded &&
+                      childVariables.map((childVariable, index) => {
+                        const isChildSelected = selectedVariables.has(
+                          childVariable.id,
+                        );
+
+                        return (
+                          <TableRow
+                            key={childVariable.id}
+                            className="bg-muted/20 border-l-2 border-l-primary/20"
+                          >
+                            <TableCell>
+                              <Checkbox
+                                checked={isChildSelected}
+                                onCheckedChange={(checked) =>
+                                  handleVariableSelect(
+                                    childVariable.id,
+                                    checked as boolean,
+                                  )
+                                }
+                                data-testid={`checkbox-child-${childVariable.id}`}
+                              />
+                            </TableCell>
+                            <TableCell className="pl-8">
+                              <Badge variant="outline" className="text-xs">
+                                {childVariable.bitPosition}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-medium text-sm pl-8">
+                              {childVariable.opcua_reg_add}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground w-32 truncate">
+                              {childVariable.description}
+                            </TableCell>
+                            <TableCell className="font-mono font-medium">
+                              {getVariableValue(childVariable)}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              {getTimestamp()}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              {childVariable.plc_reg_add}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {childVariable.type}
+                            </TableCell>
+                            <TableCell>
+                              {renderUserDescriptionCell(childVariable)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                   </React.Fragment>
                 );
               })}
-              
+
               {filteredParentVariables.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={9}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     {searchTerm ? t("noMatchingVariables") : t("noData")}
                   </TableCell>
                 </TableRow>

@@ -165,12 +165,13 @@ export default function Dashboard() {
       toast({
         title: "Export Successful",
         description: "CSV file has been downloaded",
+        variant: "success",
       });
     } catch (error) {
       toast({
         title: "Export Failed",
         description: "Failed to export CSV data",
-        variant: "destructive",
+        variant: "error",
       });
     }
   };
@@ -224,6 +225,7 @@ export default function Dashboard() {
               toast({
                 title: t("success"),
                 description: t("dataRefreshed"),
+                variant: "success",
               });
             }}
           />
