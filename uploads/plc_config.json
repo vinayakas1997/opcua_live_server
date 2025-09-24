@@ -1,0 +1,996 @@
+{
+  "plcs": [
+    {
+      "plc_name": "PLC1",
+      "plc_no":1,
+      "plc_ip": "192.168.2.2",
+      "opcua_url": "opc.tcp://192.168.1.20:4840",
+      "address_mappings": [
+        {
+          "plc_reg_add": "1",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_1_BC",
+          "description": "Boolean channel for address 1",
+          "Memory_Area": "I/O",
+          "metadata": {
+            "bit_count": 3,
+            "bit_mappings": {
+              "bit_00": {
+                "address": "1.00",
+                "description": "ｼｸﾞﾅﾙﾀﾜｰ",
+                "bit_position": 0
+              },
+              "bit_01": {
+                "address": "1.01",
+                "description": "ｼｸﾞﾅﾙﾀﾜｰ",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "1.02",
+                "description": "ｼｸﾞﾅﾙﾀﾜｰ",
+                "bit_position": 2
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "200",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_200_BC",
+          "description": "Boolean channel for address 200",
+          "Memory_Area": "I/O",
+          "metadata": {
+            "bit_count": 3,
+            "bit_mappings": {
+              "bit_00": {
+                "address": "200.00",
+                "description": "TP リセット",
+                "bit_position": 0
+              },
+              "bit_01": {
+                "address": "200.01",
+                "description": "TP リセット",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "200.02",
+                "description": "TP リセット",
+                "bit_position": 2
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "2100.02",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_2100_B02",
+          "description": "V780_NORM",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "2300.02",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_2300_B02",
+          "description": "V780_NORM",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "2500.02",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_2500_B02",
+          "description": "V780_NORM",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3100",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3100_BC",
+          "description": "Boolean channel for address 3100",
+          "Memory_Area": "I/O",
+          "metadata": {
+            "bit_count": 2,
+            "bit_mappings": {
+              "bit_01": {
+                "address": "3100.01",
+                "description": "V780_BUSY",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "3100.02",
+                "description": "V780_NORM",
+                "bit_position": 2
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "3700.00",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_3700_B00",
+          "description": "V780_EXE",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4100.02",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_4100_B02",
+          "description": "V780_NORM",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4700.00",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_4700_B00",
+          "description": "V780_EXE",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5100.02",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_5100_B02",
+          "description": "V780_NORM",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5700.00",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_IO_5700_B00",
+          "description": "V780_EXE",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "D1000",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_1000_BC",
+          "description": "Boolean channel for address D1000",
+          "Memory_Area": "D",
+          "metadata": {
+            "bit_count": 3,
+            "bit_mappings": {
+              "bit_00": {
+                "address": "D1000.00",
+                "description": "MESV780-1_リセット",
+                "bit_position": 0
+              },
+              "bit_01": {
+                "address": "D1000.01",
+                "description": "MESV780-2_リセット",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "D1000.02",
+                "description": "MESV780-3_リセット",
+                "bit_position": 2
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "D1010",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_1010_BC",
+          "description": "Boolean channel for address D1010",
+          "Memory_Area": "D",
+          "metadata": {
+            "bit_count": 6,
+            "bit_mappings": {
+              "bit_00": {
+                "address": "D1010.00",
+                "description": "1_V780_NORM",
+                "bit_position": 0
+              },
+              "bit_01": {
+                "address": "D1010.01",
+                "description": "2_V780_NORM",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "D1010.02",
+                "description": "3_V780_NORM",
+                "bit_position": 2
+              },
+              "bit_04": {
+                "address": "D1010.04",
+                "description": "RFID-1完了",
+                "bit_position": 4
+              },
+              "bit_05": {
+                "address": "D1010.05",
+                "description": "RFID-2完了",
+                "bit_position": 5
+              },
+              "bit_06": {
+                "address": "D1010.06",
+                "description": "RFID-3完了",
+                "bit_position": 6
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "D1020",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_1020_BC",
+          "description": "Boolean channel for address D1020",
+          "Memory_Area": "D",
+          "metadata": {
+            "bit_count": 3,
+            "bit_mappings": {
+              "bit_00": {
+                "address": "D1020.00",
+                "description": "1_V780_NORM",
+                "bit_position": 0
+              },
+              "bit_01": {
+                "address": "D1020.01",
+                "description": "2_V780_NORM",
+                "bit_position": 1
+              },
+              "bit_02": {
+                "address": "D1020.02",
+                "description": "3_V780_NORM",
+                "bit_position": 2
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "T0000.00",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_T_0000_B00",
+          "description": "5秒ｸﾛｯｸ",
+          "Memory_Area": "T"
+        },
+        {
+          "plc_reg_add": "T0001.00",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_T_0001_B00",
+          "description": "5秒ｸﾛｯｸ",
+          "Memory_Area": "T"
+        },
+        {
+          "plc_reg_add": "A401.08",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_A_401_B08",
+          "description": "ｻｲｸﾙﾀｲﾑｵｰﾊﾞｰﾌﾗｸﾞ",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A200",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_A_200_BC",
+          "description": "Boolean channel for address A200",
+          "Memory_Area": "A",
+          "metadata": {
+            "bit_count": 3,
+            "bit_mappings": {
+              "bit_11": {
+                "address": "A200.11",
+                "description": "運転開始時1ｻｲｸﾙONﾌﾗｸﾞ",
+                "bit_position": 11
+              },
+              "bit_15": {
+                "address": "A200.15",
+                "description": "ﾀｽｸ初回起動ﾌﾗｸﾞ",
+                "bit_position": 15
+              },
+              "bit_12": {
+                "address": "A200.12",
+                "description": "ｽﾃｯﾌﾟﾗﾀﾞｰ1ｻｲｸﾙONﾌﾗｸﾞ",
+                "bit_position": 12
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "A402",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_A_402_BC",
+          "description": "Boolean channel for address A402",
+          "Memory_Area": "A",
+          "metadata": {
+            "bit_count": 2,
+            "bit_mappings": {
+              "bit_09": {
+                "address": "A402.09",
+                "description": "I/O照合異常",
+                "bit_position": 9
+              },
+              "bit_04": {
+                "address": "A402.04",
+                "description": "電池異常",
+                "bit_position": 4
+              }
+            }
+          }
+        },
+        {
+          "plc_reg_add": "A500.15",
+          "data_type": "bool",
+          "opcua_reg_add": "P1_A_500_B15",
+          "description": "負荷遮断ﾌﾗｸﾞ",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "110",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_110_C",
+          "description": "箱ID判定用",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "120",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_120_C",
+          "description": "箱ID判定用",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3107",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3107_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3108",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3108_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3109",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3109_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3110",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3110_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3111",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3111_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "3112",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_3112_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4107",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4107_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4108",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4108_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4109",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4109_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4110",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4110_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4111",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4111_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "4112",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_4112_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5107",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5107_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5108",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5108_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5109",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5109_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5110",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5110_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5111",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5111_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "5112",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_IO_5112_C",
+          "description": "ID読取",
+          "Memory_Area": "I/O"
+        },
+        {
+          "plc_reg_add": "D3360",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_3360_C",
+          "description": "FZ620_OUT",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D3460",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_3460_C",
+          "description": "FZ621_OUT",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D3560",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_D_3560_C",
+          "description": "FZ622_OUT",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "E00010",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_00010_C",
+          "description": "箱ID判定用",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E00020",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_00020_C",
+          "description": "箱ID判定用",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E00030",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_00030_C",
+          "description": "箱ID判定用",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01000",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01000_C",
+          "description": "RFID1桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01001",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01001_C",
+          "description": "RFID2桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01002",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01002_C",
+          "description": "RFID3桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01003",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01003_C",
+          "description": "RFID4桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01004",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01004_C",
+          "description": "RFID5桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01005",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01005_C",
+          "description": "RFID6桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01010",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01010_C",
+          "description": "RFID1桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01011",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01011_C",
+          "description": "RFID2桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01012",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01012_C",
+          "description": "RFID3桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01013",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01013_C",
+          "description": "RFID4桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01014",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01014_C",
+          "description": "RFID5桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01015",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01015_C",
+          "description": "RFID6桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01020",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01020_C",
+          "description": "RFID1桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E01022",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_01022_C",
+          "description": "RFID3桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02000",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02000_C",
+          "description": "RFID1桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02001",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02001_C",
+          "description": "RFID2桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02002",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02002_C",
+          "description": "RFID3桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02003",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02003_C",
+          "description": "RFID4桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02004",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02004_C",
+          "description": "RFID5桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02005",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02005_C",
+          "description": "RFID6桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02010",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02010_C",
+          "description": "RFID1桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02012",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02012_C",
+          "description": "RFID3桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02013",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02013_C",
+          "description": "RFID4桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02014",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02014_C",
+          "description": "RFID5桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E02015",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_02015_C",
+          "description": "RFID6桁目",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03000",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03000_C",
+          "description": "RFID1桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03001",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03001_C",
+          "description": "RFID2桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03002",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03002_C",
+          "description": "RFID3桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03003",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03003_C",
+          "description": "RFID4桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03004",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03004_C",
+          "description": "RFID5桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03005",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03005_C",
+          "description": "RFID6桁目（箱）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03010",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03010_C",
+          "description": "RFID1桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03011",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03011_C",
+          "description": "RFID2桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03012",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03012_C",
+          "description": "RFID3桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03013",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03013_C",
+          "description": "RFID4桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03014",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03014_C",
+          "description": "RFID5桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "E03015",
+          "data_type": "channel",
+          "opcua_reg_add": "P1_E_03015_C",
+          "description": "RFID6桁目（背番号）",
+          "Memory_Area": "E"
+        },
+        {
+          "plc_reg_add": "D0",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_0_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D2",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_2_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D3",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_3_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D4",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_4_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D100",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_100_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D101",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_101_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D102",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_102_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D103",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_103_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D104",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_104_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1000",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1000_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1100",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1100_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1200",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1200_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1500",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1500_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "D1600",
+          "data_type": "word",
+          "opcua_reg_add": "P1_D_1600_W1",
+          "description": "",
+          "Memory_Area": "D"
+        },
+        {
+          "plc_reg_add": "A450",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_450_W1",
+          "description": "CIOｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A264",
+          "data_type": "udint",
+          "opcua_reg_add": "P1_A_264_W2",
+          "description": "ｻｲｸﾙﾀｲﾑ現在値",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A460",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_460_W1",
+          "description": "DMｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A461",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_461_W1",
+          "description": "EM0ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A462",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_462_W1",
+          "description": "EM1ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A463",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_463_W1",
+          "description": "EM2ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A464",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_464_W1",
+          "description": "EM3ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A465",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_465_W1",
+          "description": "EM4ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A466",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_466_W1",
+          "description": "EM5ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A467",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_467_W1",
+          "description": "EM6ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A468",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_468_W1",
+          "description": "EM7ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A469",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_469_W1",
+          "description": "EM8ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A470",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_470_W1",
+          "description": "EM9ｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A471",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_471_W1",
+          "description": "EMAｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A472",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_472_W1",
+          "description": "EMBｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A473",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_473_W1",
+          "description": "EMCｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A452",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_452_W1",
+          "description": "HRｴﾘｱ指定",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A262",
+          "data_type": "udint",
+          "opcua_reg_add": "P1_A_262_W2",
+          "description": "ｻｲｸﾙﾀｲﾑ最大値",
+          "Memory_Area": "A"
+        },
+        {
+          "plc_reg_add": "A451",
+          "data_type": "word",
+          "opcua_reg_add": "P1_A_451_W1",
+          "description": "WRｴﾘｱ指定",
+          "Memory_Area": "A"
+        }
+      ]
+    }
+  ]
+}

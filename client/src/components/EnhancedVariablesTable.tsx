@@ -134,38 +134,66 @@ export default function EnhancedVariablesTable({
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
-  const getDataTypeBadge = (variable: NormalizedVariable) => {
-    const variant = variable.type === 'bool' ? 'secondary' : 'default';
-    return (
-      <Badge variant={variant} className="text-xs">
-        {variable.type === 'bool' ? t("bool") : t("channel")}
-      </Badge>
-    );
+  // Get status-based background color
+  const getStatusBackgroundColor = (status: string = "active") => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 dark:bg-green-900/20";
+      case "maintenance":
+        return "bg-yellow-100 dark:bg-yellow-900/20";
+      case "error":
+        return "bg-red-100 dark:bg-red-900/20";
+      default:
+        return "bg-green-100 dark:bg-green-900/20";
+    }
   };
 
-  // Load user descriptions when PLC changes
-  useEffect(() => {
-    if (plc?.id) {
-      loadUserDescriptions();
+  // Generate individual bit rows for BC (Boolean Channel) variables
+  const generateBitRows = (variable: NormalizedVariable) => {
+    if (!variable.opcua_reg_add.endsWith('_BC')) {
+      return [];
     }
-  }, [plc?.id]);
 
-  const loadUserDescriptions = async () => {
-    if (!plc?.id) return;
-    
-    try {
-      const response = await fetch(`/api/plcs/${plc.id}/descriptions`);
-      if (response.ok) {
-        const descriptions = await response.json();
-        const descMap = new Map();
-        descriptions.forEach((desc: any) => {
-          descMap.set(desc.node_id, desc.user_description);
-        });
-        setUserDescriptions(descMap);
-      }
-    } catch (error) {
-      console.error('Failed to load user descriptions:', error);
+    // Check if variable has metadata with bit mappings (from uploaded config)
+    if (variable.metadata?.bit_mappings) {
+      return Object.entries(variable.metadata.bit_mappings).map(([bitKey, bitData]) => {
+        const bitNumber = bitData.bit_position.toString().padStart(2, '0');
+        const bitName = variable.opcua_reg_add.replace('_BC', `_BC_${bitNumber}`);
+        
+        return {
+          ...variable,
+          id: `${variable.id}_bit_${bitNumber}`,
+          opcua_reg_add: bitName,
+          description: bitData.description,
+          type: "bool",
+          isBitRow: true,
+          parentId: variable.id,
+          bitPosition: bitData.bit_position,
+        };
+      });
     }
+
+    // Fallback: generate default bit rows for BC variables without metadata
+    const defaultBitCount = 8;
+    const bitRows = [];
+    
+    for (let bit = 0; bit < defaultBitCount; bit++) {
+      const bitNumber = bit.toString().padStart(2, '0');
+      const bitName = variable.opcua_reg_add.replace('_BC', `_BC_${bitNumber}`);
+      
+      bitRows.push({
+        ...variable,
+        id: `${variable.id}_bit_${bitNumber}`,
+        opcua_reg_add: bitName,
+        description: `Bit ${bitNumber} of ${variable.description}`,
+        type: "bool",
+        isBitRow: true,
+        parentId: variable.id,
+        bitPosition: bit,
+      });
+    }
+    
+    return bitRows;
   };
 
   const handleDescriptionEdit = (nodeId: string) => {
@@ -277,71 +305,63 @@ export default function EnhancedVariablesTable({
   return (
     <div className="space-y-6" data-testid="enhanced-variables-table">
       {/* Header Section */}
-      <div className="space-y-4">
-        {/* Title and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              {t("realTimeData")}
-              <Badge variant="outline" className="font-mono text-xs">
-                {totalVariables} {t("variables")}
-              </Badge>
-              {selectedCount > 0 && (
-                <Badge variant="default" className="font-mono text-xs bg-primary">
-                  {selectedCount} {t("selected")}
-                </Badge>
-              )}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              data-testid="button-refresh-variables"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-            
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={onExportCSV}
-              className="bg-green-600 text-white"
-              data-testid="button-export-variables"
-            >
-              <Download className="h-4 w-4 mr-1" />
-              CSV
-            </Button>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {t("variablesTable")} - PLC {plc?.plc_no || 1}
+          </h2>
+          <p className="text-muted-foreground">
+            {t("totalVariables")}: {variables.length}
+          </p>
         </div>
         
-        {/* Search and Filter */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={`${t("search")} ${t("variables").toLowerCase()}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-              data-testid="input-search-variables"
-            />
-          </div>
-          
-          <Button
-            variant={showSelectedOnly ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowSelectedOnly(!showSelectedOnly)}
-            className="gap-2"
-            data-testid="button-toggle-selected"
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            data-testid="button-refresh-variables"
           >
-            {showSelectedOnly ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            {showSelectedOnly ? t("showAll") : t("showSelected")}
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={onExportCSV}
+            className="bg-green-600 text-white"
+            data-testid="button-export-variables"
+          >
+            <Download className="h-4 w-4 mr-1" />
+            CSV
           </Button>
         </div>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={`${t("search")} ${t("variables").toLowerCase()}...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+            data-testid="input-search-variables"
+          />
+        </div>
+        
+        <Button
+          variant={showSelectedOnly ? "default" : "outline"}
+          size="sm"
+          onClick={() => setShowSelectedOnly(!showSelectedOnly)}
+          className="gap-2"
+          data-testid="button-toggle-selected"
+        >
+          {showSelectedOnly ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {showSelectedOnly ? t("showAll") : t("showSelected")}
+        </Button>
       </div>
 
       {/* Table Section */}
@@ -367,10 +387,13 @@ export default function EnhancedVariablesTable({
                   variables,
                   variable.id,
                 );
+                const bitRows = generateBitRows(variable);
                 const isExpanded = isChannelExpanded(variable.id);
                 const isSelected = selectedVariables.has(variable.id);
                 const hasChildren =
                   variable.type === "channel" && childVariables.length > 0;
+                const hasBits = bitRows.length > 0;
+                const statusBgColor = getStatusBackgroundColor("active");
 
                 return (
                   <React.Fragment key={variable.id}>
@@ -379,7 +402,7 @@ export default function EnhancedVariablesTable({
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) =>
-                            hasChildren
+                            hasChildren || hasBits
                               ? handleChannelSelect(
                                   variable.id,
                                   checked as boolean,
@@ -393,7 +416,7 @@ export default function EnhancedVariablesTable({
                         />
                       </TableCell>
                       <TableCell>
-                        {hasChildren && (
+                        {(hasChildren || hasBits) && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -416,10 +439,10 @@ export default function EnhancedVariablesTable({
                       <TableCell className="text-sm text-muted-foreground w-32 truncate">
                         {variable.description}
                       </TableCell>
-                      <TableCell className="font-mono font-medium">
+                      <TableCell className={`font-mono font-medium ${statusBgColor}`}>
                         {getVariableValue(variable)}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
+                      <TableCell className={`font-mono text-xs text-muted-foreground ${statusBgColor}`}>
                         {getTimestamp()}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
@@ -432,6 +455,61 @@ export default function EnhancedVariablesTable({
                         {renderUserDescriptionCell(variable)}
                       </TableCell>
                     </TableRow>
+
+                    {/* Render bit rows for BC variables */}
+                    {hasBits &&
+                      isExpanded &&
+                      bitRows.map((bitRow) => {
+                        const isBitSelected = selectedVariables.has(bitRow.id);
+
+                        return (
+                          <TableRow
+                            key={bitRow.id}
+                            className="bg-muted/20 border-l-2 border-l-primary/20"
+                          >
+                            <TableCell>
+                              <Checkbox
+                                checked={isBitSelected}
+                                onCheckedChange={(checked) =>
+                                  handleVariableSelect(
+                                    bitRow.id,
+                                    checked as boolean,
+                                  )
+                                }
+                                data-testid={`checkbox-bit-${bitRow.id}`}
+                              />
+                            </TableCell>
+                            <TableCell className="pl-8">
+                              <Badge variant="outline" className="text-xs">
+                                {bitRow.bitPosition.toString().padStart(2, '0')}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-medium text-sm pl-8">
+                              {bitRow.opcua_reg_add}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground w-32 truncate">
+                              {bitRow.description}
+                            </TableCell>
+                            <TableCell className={`font-mono font-medium ${statusBgColor}`}>
+                              {getVariableValue(bitRow)}
+                            </TableCell>
+                            <TableCell className={`font-mono text-xs text-muted-foreground ${statusBgColor}`}>
+                              {getTimestamp()}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              {bitRow.plc_reg_add}.{bitRow.bitPosition.toString().padStart(2, '0')}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {bitRow.type}
+                            </TableCell>
+                            <TableCell>
+                              {renderUserDescriptionCell(bitRow)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+
+                    {/* Render existing child variables */}
                     {hasChildren &&
                       isExpanded &&
                       childVariables.map((childVariable, index) => {
@@ -467,10 +545,10 @@ export default function EnhancedVariablesTable({
                             <TableCell className="text-sm text-muted-foreground w-32 truncate">
                               {childVariable.description}
                             </TableCell>
-                            <TableCell className="font-mono font-medium">
+                            <TableCell className={`font-mono font-medium ${statusBgColor}`}>
                               {getVariableValue(childVariable)}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground">
+                            <TableCell className={`font-mono text-xs text-muted-foreground ${statusBgColor}`}>
                               {getTimestamp()}
                             </TableCell>
                             <TableCell className="font-mono text-xs text-muted-foreground">

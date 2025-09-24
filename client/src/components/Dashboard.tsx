@@ -33,117 +33,96 @@ export default function Dashboard() {
     ? plcs.find(p => p.id === selectedPlcId) 
     : connectedPLCs.length > 0 ? connectedPLCs[0] : null;
 
-  // Convert regular PLC to NormalizedPLC with mock variables for testing
-  const createMockNormalizedPLC = (plc: PLC): NormalizedPLC => {
-    const mockVariables: NormalizedVariable[] = [
-      // Channel variable with children
-      {
-        id: `${plc.id}_ch1`,
-        type: 'channel',
-        plc_reg_add: 'D100',
-        opcua_reg_add: 'ns=2;i=1001',
-        description: 'Motor Control Status Register',
-        data_type: 'channel',
-        hasChildren: true,
-      },
-      // Child bit variables
-      {
-        id: `${plc.id}_ch1_bit0`,
-        type: 'bool',
-        plc_reg_add: 'D100.0',
-        opcua_reg_add: 'ns=2;i=1001.0',
-        description: 'Motor Running Status',
-        data_type: 'bool',
-        parentId: `${plc.id}_ch1`,
-        bitPosition: 0,
-      },
-      {
-        id: `${plc.id}_ch1_bit1`,
-        type: 'bool',
-        plc_reg_add: 'D100.1',
-        opcua_reg_add: 'ns=2;i=1001.1',
-        description: 'Motor Alarm Status',
-        data_type: 'bool',
-        parentId: `${plc.id}_ch1`,
-        bitPosition: 1,
-      },
-      {
-        id: `${plc.id}_ch1_bit2`,
-        type: 'bool',
-        plc_reg_add: 'D100.2',
-        opcua_reg_add: 'ns=2;i=1001.2',
-        description: 'Emergency Stop Active',
-        data_type: 'bool',
-        parentId: `${plc.id}_ch1`,
-        bitPosition: 2,
-      },
-      // Another channel variable
-      {
-        id: `${plc.id}_ch2`,
-        type: 'channel',
-        plc_reg_add: 'D101',
-        opcua_reg_add: 'ns=2;i=1002',
-        description: 'Temperature Sensor Data',
-        data_type: 'channel',
-        hasChildren: true,
-      },
-      // Child variables for temperature
-      {
-        id: `${plc.id}_ch2_bit0`,
-        type: 'bool',
-        plc_reg_add: 'D101.0',
-        opcua_reg_add: 'ns=2;i=1002.0',
-        description: 'Temperature High Warning',
-        data_type: 'bool',
-        parentId: `${plc.id}_ch2`,
-        bitPosition: 0,
-      },
-      {
-        id: `${plc.id}_ch2_bit1`,
-        type: 'bool',
-        plc_reg_add: 'D101.1',
-        opcua_reg_add: 'ns=2;i=1002.1',
-        description: 'Temperature Critical Alert',
-        data_type: 'bool',
-        parentId: `${plc.id}_ch2`,
-        bitPosition: 1,
-      },
-      // Standalone bool variables
-      {
-        id: `${plc.id}_bool1`,
-        type: 'bool',
-        plc_reg_add: 'M10',
-        opcua_reg_add: 'ns=2;i=2001',
-        description: 'Manual Override Enable',
-        data_type: 'bool',
-      },
-      {
-        id: `${plc.id}_bool2`,
-        type: 'bool',
-        plc_reg_add: 'M11',
-        opcua_reg_add: 'ns=2;i=2002',
-        description: 'Maintenance Mode Active',
-        data_type: 'bool',
-      },
-    ];
+  // Convert regular PLC to NormalizedPLC using actual data from uploaded config
+  const createNormalizedPLCFromConfig = (plc: PLC): NormalizedPLC => {
+    // If PLC has address_mappings, use them to create variables
+    const variables: NormalizedVariable[] = [];
+    
+    if (plc.address_mappings && plc.address_mappings.length > 0) {
+      plc.address_mappings.forEach((mapping, index) => {
+        // Create variable from address mapping
+        const variable: NormalizedVariable = {
+          id: mapping.node_id || `${plc.id}_var_${index}`,
+          type: mapping.data_type === 'channel' ? 'channel' : 'bool',
+          plc_reg_add: mapping.node_name, // Use node_name as PLC register address
+          opcua_reg_add: mapping.node_name, // Use node_name as OPC UA register
+          description: mapping.description || 'No description',
+          data_type: mapping.data_type || 'unknown',
+        };
+
+        // Check if this is a Boolean Channel (_BC) variable
+        if (mapping.node_name.endsWith('_BC')) {
+          variable.type = 'channel';
+          variable.hasChildren = true;
+          
+          // Create mock bit mappings for BC variables (in real implementation, this would come from metadata)
+          const bitCount = 8; // Default bit count for BC variables
+          const bitVariables: NormalizedVariable[] = [];
+          
+          for (let bit = 0; bit < bitCount; bit++) {
+            const bitNumber = bit.toString().padStart(2, '0');
+            const bitVariable: NormalizedVariable = {
+              id: `${variable.id}_bit_${bitNumber}`,
+              type: 'bool',
+              plc_reg_add: `${mapping.node_name.replace('_BC', '')}.${bitNumber}`,
+              opcua_reg_add: mapping.node_name.replace('_BC', `_BC_${bitNumber}`),
+              description: `Bit ${bitNumber} of ${mapping.description || mapping.node_name}`,
+              data_type: 'bool',
+              parentId: variable.id,
+              bitPosition: bit,
+            };
+            bitVariables.push(bitVariable);
+          }
+          
+          variables.push(variable, ...bitVariables);
+        } else {
+          variables.push(variable);
+        }
+      });
+    }
+
+    // If no address mappings, create some default variables for display
+    if (variables.length === 0) {
+      const defaultVariables: NormalizedVariable[] = [
+        {
+          id: `${plc.id}_default_1`,
+          type: 'bool',
+          plc_reg_add: 'M10',
+          opcua_reg_add: 'ns=2;i=1001',
+          description: 'Default Boolean Variable',
+          data_type: 'bool',
+        },
+        {
+          id: `${plc.id}_default_2`,
+          type: 'channel',
+          plc_reg_add: 'D100',
+          opcua_reg_add: 'ns=2;i=1002',
+          description: 'Default Channel Variable',
+          data_type: 'channel',
+          hasChildren: false,
+        },
+      ];
+      variables.push(...defaultVariables);
+    }
 
     return {
       id: plc.id,
       plc_name: plc.plc_name,
+      plc_no: plc.plc_no,
       plc_ip: plc.plc_ip,
       opcua_url: plc.opcua_url,
       status: plc.status,
       last_checked: plc.last_checked,
       is_connected: plc.is_connected,
       created_at: plc.created_at,
-      variables: mockVariables,
-      registerCount: mockVariables.length,
-      boolCount: mockVariables.filter(v => v.type === 'bool').length,
-      channelCount: mockVariables.filter(v => v.type === 'channel').length,
+      variables: variables,
+      registerCount: variables.length,
+      boolCount: variables.filter(v => v.type === 'bool').length,
+      channelCount: variables.filter(v => v.type === 'channel').length,
     };
   };
 
-  const normalizedSelectedPLC = selectedPLC ? createMockNormalizedPLC(selectedPLC) : null;
+  const normalizedSelectedPLC = selectedPLC ? createNormalizedPLCFromConfig(selectedPLC) : null;
   
   // Debug logging (cleaned up for production)
   // console.log('Selected PLC:', selectedPLC);

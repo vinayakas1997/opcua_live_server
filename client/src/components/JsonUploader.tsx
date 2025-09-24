@@ -35,8 +35,7 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
       if (firstNormalizedPLC) {
         const apiConfig: PLCConfig = {
           plc_name: firstNormalizedPLC.plc_name,
-          // Only include plc_no if it's a positive number, otherwise omit it (it's optional)
-          ...(firstNormalizedPLC.plc_no && firstNormalizedPLC.plc_no > 0 ? { plc_no: firstNormalizedPLC.plc_no } : {}),
+          plc_no: firstNormalizedPLC.plc_no, // Always include plc_no
           plc_ip: firstNormalizedPLC.plc_ip,
           opcua_url: firstNormalizedPLC.opcua_url,
           address_mappings: firstNormalizedPLC.variables
@@ -186,7 +185,7 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">PLC Number</label>
-                <p className="font-mono text-sm">{uploadedConfig.plc_no}</p>
+                <p className="font-mono text-sm">{uploadedConfig.plc_no || 'Not specified'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">IP Address</label>

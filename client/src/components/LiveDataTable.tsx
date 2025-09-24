@@ -10,9 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Download, RefreshCw, Filter } from "lucide-react";
+import { Search, Download, RefreshCw, Filter, Database } from "lucide-react";
 import { mockNodeData, type NodeData } from "@shared/schema";
 
 interface LiveDataTableProps {
@@ -80,54 +80,51 @@ export default function LiveDataTable({
     return <Badge variant={variant} className="text-xs">{quality}</Badge>;
   };
 
+  // Get status-based background color
+  const getStatusBackgroundColor = (status: string = "active") => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 dark:bg-green-900/20";
+      case "maintenance":
+        return "bg-yellow-100 dark:bg-yellow-900/20";
+      case "error":
+        return "bg-red-100 dark:bg-red-900/20";
+      default:
+        return "bg-green-100 dark:bg-green-900/20";
+    }
+  };
+
+  const statusBgColor = getStatusBackgroundColor("active");
+
   return (
     <Card data-testid="card-live-data">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            Live Node Data
-            <Badge variant="outline" className="font-mono text-xs">
-              {filteredData.length} nodes
-            </Badge>
-          </CardTitle>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              Last update: {lastUpdate.toLocaleTimeString()}
-            </span>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              data-testid="button-refresh-data"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleExport}
-              data-testid="button-export-csv"
-            >
-              <Download className="h-4 w-4" />
-              CSV
-            </Button>
+          <div>
+            <CardTitle>Live Data - PLC 1</CardTitle>
+            <CardDescription>
+              Real-time monitoring of PLC variables
+            </CardDescription>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Filter by node name or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-              data-testid="input-filter-nodes"
-            />
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              data-testid="button-refresh-live-data"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExportCSV}
+              data-testid="button-export-live-data"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -138,10 +135,11 @@ export default function LiveDataTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Node Name</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead className="w-32">Description</TableHead>
                 <TableHead>Value</TableHead>
                 <TableHead>Timestamp</TableHead>
                 <TableHead>Address</TableHead>
+                <TableHead>Data Type</TableHead>
                 <TableHead>User Description</TableHead>
               </TableRow>
             </TableHeader>
@@ -151,17 +149,20 @@ export default function LiveDataTable({
                   <TableCell className="font-medium">
                     {item.node_name}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground w-32 truncate">
                     {item.node_id}
                   </TableCell>
-                  <TableCell className="font-mono font-medium">
+                  <TableCell className={`font-mono font-medium ${statusBgColor}`}>
                     {formatValue(item.current_value, item.data_type)}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {item.timestamp.toLocaleTimeString()}
+                  <TableCell className={`font-mono text-xs text-muted-foreground ${statusBgColor}`}>
+                    {item.timestamp.toLocaleTimeString('en-GB', { hour12: false })}
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
                     {item.node_id}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {item.data_type}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground italic">
                     Click to add description...
@@ -172,13 +173,18 @@ export default function LiveDataTable({
           </Table>
           
           {filteredData.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <div className="space-y-2">
-                <p className="text-lg">No data found</p>
-                <p className="text-sm">
-                  {searchTerm ? "Try adjusting your filter terms" : "No node data available"}
-                </p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-muted p-3 mb-4">
+                <Database className="h-6 w-6 text-muted-foreground" />
               </div>
+              <h3 className="text-lg font-semibold mb-2">No Data Available</h3>
+              <p className="text-muted-foreground mb-4 max-w-sm">
+                No live data is currently available. Check your PLC connection or try refreshing.
+              </p>
+              <Button variant="outline" onClick={onRefresh}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Data
+              </Button>
             </div>
           )}
         </ScrollArea>

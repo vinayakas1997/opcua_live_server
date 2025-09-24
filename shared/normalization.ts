@@ -30,11 +30,20 @@ export interface NormalizedVariable {
   bitPosition?: number;
   hasChildren?: boolean;
   children?: NormalizedVariable[];
+  metadata?: {
+    bit_count: number;
+    bit_mappings: Record<string, {
+      address: string;
+      description: string;
+      bit_position: number;
+    }>;
+  };
 }
 
 export interface NormalizedPLC {
   id: string;
   plc_name: string;
+  plc_no?: number; // Add plc_no field
   plc_ip: string;
   opcua_url: string;
   status: "active" | "maintenance" | "error";
@@ -67,6 +76,7 @@ function normalizeAddressMapping(mapping: AddressMapping): NormalizedVariable[] 
     opcua_reg_add: mapping.opcua_reg_add,
     description: mapping.description,
     data_type: mapping.data_type,
+    metadata: mapping.metadata, // Preserve metadata
   };
 
   // Handle simple bool variables
@@ -146,6 +156,7 @@ export function normalizePLCConfig(json: RawJSONData): NormalizedPLC[] {
     const normalizedPLC: NormalizedPLC = {
       id: Math.random().toString(36).substr(2, 9), // Generate ID if not present
       plc_name: plc.plc_name,
+      plc_no: plc.plc_no, // Include plc_no from the config
       plc_ip: plc.plc_ip,
       opcua_url: plc.opcua_url,
       status: "maintenance",
