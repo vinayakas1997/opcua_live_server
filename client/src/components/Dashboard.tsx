@@ -183,12 +183,20 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
             {selectedPLC ? `${selectedPLC.plc_name} Variables` : "OPC UA Dashboard"}
           </h1>
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground" data-testid="text-plcs-connected">
-              {connectedPLCs.length}/{plcs.length} PLCs Connected
-            </div>
-            <div className="text-sm text-muted-foreground" data-testid="text-last-updated">
-              {t("lastUpdated")}: {new Date().toLocaleTimeString()}
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+                <div className={`w-2 h-2 rounded-full ${connectedPLCs.length > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium" data-testid="text-plcs-connected">
+                  {connectedPLCs.length}/{plcs.length} PLCs Connected
+                </span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                <span className="text-sm font-medium" data-testid="text-last-updated">
+                  Last Updated: {new Date().toLocaleTimeString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>

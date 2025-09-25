@@ -176,6 +176,30 @@ export function AppSidebar({
                               </div>
                               
                               <div className="flex items-center gap-1 shrink-0">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-4 w-4 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRefresh(plc.id);
+                                  }}
+                                  data-testid={`button-refresh-inline-${plc.id}`}
+                                >
+                                  <RefreshCw className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-4 w-4 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(plc.id);
+                                  }}
+                                  data-testid={`button-delete-inline-${plc.id}`}
+                                >
+                                  <Trash2 className="h-3 w-3 text-red-500" />
+                                </Button>
                                 {isConnected ? (
                                   <Wifi className={`h-3 w-3 ${
                                     plc.status === 'maintenance' ? 'text-yellow-600' : 'text-green-600'
