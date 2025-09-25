@@ -196,8 +196,8 @@ export default function Dashboard() {
 
       <div className="flex-1 overflow-hidden">
         {connectedPLCs.length > 0 || selectedPLC ? (
-          <EnhancedVariablesTable 
-            plc={normalizedSelectedPLC || undefined}
+          <EnhancedVariablesTable
+            plc={normalizedSelectedPLC || null}
             onExportCSV={handleExportCSV}
             onRefresh={() => {
               queryClient.invalidateQueries({ queryKey: ["/api/plcs"] });

@@ -25,16 +25,18 @@ export default function PLCList({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const filteredAndSortedPLCs = useMemo(() => {
-    let filtered = plcs.filter((plc) => 
+    let filtered = plcs.filter((plc) =>
       plc.plc_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plc.plc_no.toString().includes(searchTerm) ||
+      (plc.plc_no?.toString() || '').includes(searchTerm) ||
       plc.plc_ip.includes(searchTerm)
     );
 
     return filtered.sort((a, b) => {
-      const comparison = sortOrder === "asc" 
-        ? a.plc_no - b.plc_no 
-        : b.plc_no - a.plc_no;
+      const aNum = a.plc_no || 0;
+      const bNum = b.plc_no || 0;
+      const comparison = sortOrder === "asc"
+        ? aNum - bNum
+        : bNum - aNum;
       return comparison;
     });
   }, [plcs, searchTerm, sortOrder]);

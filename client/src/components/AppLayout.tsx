@@ -13,7 +13,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Plus, Search, LayoutDashboard, Server } from "lucide-react";
+import { Plus, Search, LayoutDashboard, Server, RefreshCw, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { AppSidebar } from "./AppSidebar";
@@ -44,7 +50,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const currentPage = location === '/servers' ? 'servers' : 'dashboard';
 
   // Fetch PLCs
-  const { data: plcs = [], isLoading, error } = useQuery({
+  const { data: plcs = [], isLoading, error } = useQuery<PLC[]>({
     queryKey: ['api', 'plcs'],
   });
 
@@ -257,6 +263,40 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
             
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
+                  toast({
+                    title: t("refreshing"),
+                    description: t("dataRefreshed"),
+                    variant: "success",
+                  });
+                }}
+                data-testid="button-refresh"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" data-testid="button-menu">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsUploadDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    {t("addNew")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => queryClient.invalidateQueries()}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    {t("refreshAll")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <LanguageSwitcher />
             </div>
           </header>

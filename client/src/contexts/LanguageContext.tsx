@@ -105,10 +105,17 @@ const translations = {
     
     // Variables table
     variables: "Variables",
+    variablesTable: "Variables Table",
+    totalVariables: "Total Variables",
+    nodeName: "Node Name",
+    timestamp: "Timestamp",
+    userDescription: "User Description",
     selected: "Selected",
     showAll: "Show All",
     showSelected: "Show Selected",
     noMatchingVariables: "No matching variables found",
+    refreshing: "Refreshing",
+    refreshAll: "Refresh All",
   },
   jp: {
     // Navigation
@@ -212,10 +219,17 @@ const translations = {
     
     // Variables table
     variables: "変数",
+    variablesTable: "変数テーブル",
+    totalVariables: "総変数",
+    nodeName: "ノード名",
+    timestamp: "タイムスタンプ",
+    userDescription: "ユーザ説明",
     selected: "選択済み",
     showAll: "すべて表示",
     showSelected: "選択済みを表示",
     noMatchingVariables: "一致する変数が見つかりません",
+    refreshing: "更新中",
+    refreshAll: "すべて更新",
   },
 } as const;
 

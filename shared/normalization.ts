@@ -30,6 +30,7 @@ export interface NormalizedVariable {
   bitPosition?: number;
   hasChildren?: boolean;
   children?: NormalizedVariable[];
+  isBitRow?: boolean; // For UI display of bit-expanded rows
   metadata?: {
     bit_count: number;
     bit_mappings: Record<string, {
@@ -272,6 +273,7 @@ export function denormalizePLC(normalizedPLC: NormalizedPLC): RawPLCConfig {
 
   const result: RawPLCConfig = {
     plc_name: normalizedPLC.plc_name,
+    plc_no: normalizedPLC.plc_no || 1, // Default to 1 if not set
     plc_ip: normalizedPLC.plc_ip,
     opcua_url: normalizedPLC.opcua_url,
     address_mappings: address_mappings,
