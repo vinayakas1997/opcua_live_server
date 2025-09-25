@@ -138,7 +138,6 @@ export default function LiveDataTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Node Name</TableHead>
-                <TableHead>Node ID</TableHead>
                 <TableHead>Current Value</TableHead>
                 <TableHead>Data Type</TableHead>
                 <TableHead>Quality</TableHead>
@@ -150,9 +149,6 @@ export default function LiveDataTable({
                 <TableRow key={`${item.node_id}-${index}`}>
                   <TableCell className="font-medium">
                     {item.node_name}
-                  </TableCell>
-                  <TableCell className="font-mono text-sm text-muted-foreground">
-                    {item.node_id}
                   </TableCell>
                   <TableCell className="font-mono font-medium">
                     {formatValue(item.current_value, item.data_type)}

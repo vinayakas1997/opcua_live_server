@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Plus, Search, LayoutDashboard, Server } from "lucide-react";
+import { Plus, Search, LayoutDashboard, Server, Database } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { AppSidebar } from "./AppSidebar";
@@ -41,11 +41,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { t } = useLanguage();
 
   // Get current page from route
-  const currentPage = location === '/servers' ? 'servers' : 'dashboard';
+  const currentPage = location === '/servers' ? 'servers' : location === '/database' ? 'database' : 'dashboard';
 
   // Fetch PLCs
-  const { data: plcs = [], isLoading, error } = useQuery({
+  const { data: plcs = [], isLoading, error } = useQuery<PLC[]>({
     queryKey: ['api', 'plcs'],
+    queryFn: api.getAllPLCs,
   });
 
   // Connect PLC mutation
@@ -162,17 +163,70 @@ export default function AppLayout({ children }: AppLayoutProps) {
     disconnectMutation.mutate(plcId);
   };
 
-  const handleDeletePLC = (plcId: string) => {
-    // Also disconnect if currently connected
-    if (selectedPLCs.has(plcId)) {
-      setSelectedPLCs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(plcId);
-        return newSet;
+  const handleDeletePLC = async (plcId: string) => {
+    // Find the PLC to get its plc_no
+    const plc = plcs.find(p => p.id === plcId);
+    if (!plc) {
+      toast({
+        title: "Error",
+        description: "PLC not found",
+        variant: "destructive",
       });
-      socketManager.unsubscribeFromPLC(plcId);
+      return;
     }
-    deleteMutation.mutate(plcId);
+
+    const plcNo = plc.plc_no || 1;
+    
+    if (!confirm(`Are you sure you want to delete PLC "${plc.plc_name}" (No. ${plcNo}) and all its associated nodes from the database?`)) {
+      return;
+    }
+
+    try {
+      console.log(`🗑️ Deleting PLC No. ${plcNo} and all associated nodes`);
+      
+      // Call the new delete endpoint that deletes by plc_no
+      const response = await fetch(`/api/plcs/by-number/${plcNo}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("✅ PLC and nodes deleted successfully:", result);
+        
+        // Also disconnect if currently connected
+        if (selectedPLCs.has(plcId)) {
+          setSelectedPLCs(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(plcId);
+            return newSet;
+          });
+          socketManager.unsubscribeFromPLC(plcId);
+        }
+        
+        // Remove from local PLC list and refresh
+        queryClient.invalidateQueries({ queryKey: ['api', 'plcs'] });
+        
+        toast({
+          title: "PLC Deleted",
+          description: `Successfully deleted PLC No. ${plcNo} and ${result.deleted_nodes_count} associated nodes`,
+        });
+      } else {
+        const error = await response.json();
+        console.error("❌ Delete failed:", error);
+        toast({
+          title: "Delete Failed",
+          description: error.message || "Failed to delete PLC",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error deleting PLC:", error);
+      toast({
+        title: "Delete Failed",
+        description: "An error occurred while deleting the PLC",
+        variant: "destructive",
+      });
+    }
   };
 
   // Custom sidebar width for better content layout
@@ -184,6 +238,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const handleTabChange = (value: string) => {
     if (value === 'servers') {
       navigate('/servers');
+    } else if (value === 'database') {
+      navigate('/database');
     } else {
       navigate('/');
     }

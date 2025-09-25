@@ -349,11 +349,10 @@ export default function EnhancedVariablesTable({
                 <TableHead className="w-8 text-left"></TableHead>
                 <TableHead className="w-8 text-left"></TableHead>
                 <TableHead className="text-left">{t("name")}</TableHead>
-                <TableHead className="text-left">{t("description")}</TableHead>
+                <TableHead className="text-left">User Description</TableHead>
                 <TableHead className="text-left">{t("value")}</TableHead>
                 <TableHead className="text-left">{t("type")}</TableHead>
                 <TableHead className="text-left">{t("address")}</TableHead>
-                <TableHead className="text-left">{t("nodeId")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody data-testid="table-variables-body">
@@ -398,8 +397,8 @@ export default function EnhancedVariablesTable({
                       <TableCell className="font-medium">
                         {variable.opcua_reg_add}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {variable.description}
+                      <TableCell>
+                        {renderUserDescriptionCell(variable)}
                       </TableCell>
                       <TableCell className="font-mono font-medium">
                         {getVariableValue(variable)}
@@ -409,9 +408,6 @@ export default function EnhancedVariablesTable({
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {variable.plc_reg_add}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {variable.opcua_reg_add}
                       </TableCell>
                     </TableRow>
                     
@@ -440,8 +436,8 @@ export default function EnhancedVariablesTable({
                           <TableCell className="font-medium text-sm pl-8">
                             {childVariable.opcua_reg_add}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {childVariable.description}
+                          <TableCell>
+                            {renderUserDescriptionCell(childVariable)}
                           </TableCell>
                           <TableCell className="font-mono font-medium">
                             {getVariableValue(childVariable)}
@@ -452,9 +448,6 @@ export default function EnhancedVariablesTable({
                           <TableCell className="font-mono text-xs text-muted-foreground">
                             {childVariable.plc_reg_add}
                           </TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">
-                            {childVariable.opcua_reg_add}
-                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -464,7 +457,7 @@ export default function EnhancedVariablesTable({
               
               {filteredParentVariables.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {searchTerm ? t("noMatchingVariables") : t("noData")}
                   </TableCell>
                 </TableRow>

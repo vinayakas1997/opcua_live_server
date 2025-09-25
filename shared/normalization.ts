@@ -261,6 +261,7 @@ export function denormalizePLC(normalizedPLC: NormalizedPLC): RawPLCConfig {
 
   const result: RawPLCConfig = {
     plc_name: normalizedPLC.plc_name,
+    plc_no: 1, // Default plc_no since it's required in RawPLCConfig
     plc_ip: normalizedPLC.plc_ip,
     opcua_url: normalizedPLC.opcua_url,
     address_mappings: address_mappings,

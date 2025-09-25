@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 // Raw JSON PLC Configuration Schema (as uploaded)
 export const rawPLCConfigSchema = z.object({
@@ -80,6 +82,59 @@ export const userDescriptionSchema = z.object({
   updated_at: z.date(),
 });
 
+// NEW SQLite Database Schema using Drizzle ORM
+export const opcuaNodesTable = sqliteTable("opcua_nodes", {
+  id: integer("id").primaryKey({ autoIncrement: true }), // Auto-increment primary key
+  plc_no: integer("plc_no").notNull(), // PLC number from JSON for filtering
+  nodeName: text("node_name").notNull(), // opcua_reg_add
+  description: text("description").notNull(),
+  value: text("value"), // Empty initially, will be populated with your logic
+  timestamp: text("timestamp").notNull(), // 24hr format timestamp
+  datatype: text("datatype").notNull(),
+  regAdd: text("reg_add").notNull(), // plc_reg_add
+  userDescription: text("user_description"),
+});
+
+export const plcsTable = sqliteTable("plcs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  plcName: text("plc_name").notNull(),
+  plcIp: text("plc_ip").notNull(),
+  plcNo: integer("plc_no").notNull(),
+  opcuaUrl: text("opcua_url").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+
+// Zod schemas for the new SQLite table
+export const opcuaNodeSchema = z.object({
+  id: z.number().int().positive("ID must be positive").optional(), // Auto-generated
+  plc_no: z.number().int().positive("PLC number must be positive"),
+  nodeName: z.string().min(1, "Node name is required"),
+  description: z.string().min(1, "Description is required"),
+  value: z.string().optional(),
+  timestamp: z.string().min(1, "Timestamp is required"),
+  datatype: z.string().min(1, "Datatype is required"),
+  regAdd: z.string().min(1, "Register address is required"),
+  userDescription: z.string().optional(),
+});
+
+export const createOpcuaNodeSchema = opcuaNodeSchema.omit({ id: true });
+export const updateOpcuaNodeSchema = opcuaNodeSchema.partial().omit({ id: true });
+
+// Zod schemas for plcs table
+export const plcsDbSchema = z.object({
+  id: z.number().int().positive("ID must be positive").optional(), // Auto-generated
+  plcName: z.string().min(1, "PLC name is required"),
+  plcIp: z.string().ip("Invalid IP address"),
+  plcNo: z.number().int().positive("PLC number must be positive"),
+  opcuaUrl: z.string().url("Invalid OPC UA URL"),
+  createdAt: z.string().optional(),
+});
+
+export const createPlcsDbSchema = plcsDbSchema.omit({ id: true, createdAt: true });
+export const updatePlcsDbSchema = plcsDbSchema.partial().omit({ id: true });
+
+// Types
 export type RawPLCConfig = z.infer<typeof rawPLCConfigSchema>;
 export type RawJSONData = z.infer<typeof rawJSONSchema>;
 export type PLCConfig = z.infer<typeof plcConfigSchema>;
@@ -90,82 +145,19 @@ export type UserDescription = z.infer<typeof userDescriptionSchema>;
 export type PLCStatus = "active" | "maintenance" | "error";
 export type ConnectionStatus = "active" | "inactive" | "error";
 
+// New types for SQLite table
+export type OpcuaNode = z.infer<typeof opcuaNodeSchema>;
+export type CreateOpcuaNode = z.infer<typeof createOpcuaNodeSchema>;
+export type UpdateOpcuaNode = z.infer<typeof updateOpcuaNodeSchema>;
+
+export type PlcDb = z.infer<typeof plcsDbSchema>;
+export type CreatePlcDb = z.infer<typeof createPlcsDbSchema>;
+export type UpdatePlcDb = z.infer<typeof updatePlcsDbSchema>;
+
 // Language types
 export type Language = "en" | "jp";
 
-// Mock data for development
-export const mockPLCs: PLC[] = [
-  {
-    id: "1",
-    plc_name: "Production Line A Controller",
-    plc_no: 101,
-    plc_ip: "192.168.1.10",
-    opcua_url: "opc.tcp://192.168.1.10:4840",
-    address_mappings: [
-      { node_name: "Temperature_01", node_id: "ns=2;i=1001", description: "Main temperature sensor", data_type: "Float" },
-      { node_name: "Pressure_01", node_id: "ns=2;i=1002", description: "System pressure", data_type: "Float" },
-      { node_name: "Motor_Speed", node_id: "ns=2;i=1003", description: "Motor RPM", data_type: "Int32" },
-    ],
-    status: "active",
-    last_checked: new Date(),
-    is_connected: true,
-    created_at: new Date(),
-  },
-  {
-    id: "2",
-    plc_name: "Packaging Unit B",
-    plc_no: 102,
-    plc_ip: "192.168.1.11",
-    opcua_url: "opc.tcp://192.168.1.11:4840",
-    address_mappings: [
-      { node_name: "Conveyor_Speed", node_id: "ns=2;i=2001", description: "Conveyor belt speed", data_type: "Float" },
-      { node_name: "Package_Count", node_id: "ns=2;i=2002", description: "Total packages", data_type: "Int32" },
-    ],
-    status: "maintenance",
-    last_checked: new Date(),
-    is_connected: false,
-    created_at: new Date(),
-  },
-  {
-    id: "3",
-    plc_name: "Quality Control System",
-    plc_no: 103,
-    plc_ip: "192.168.1.12",
-    opcua_url: "opc.tcp://192.168.1.12:4840",
-    address_mappings: [
-      { node_name: "Test_Result", node_id: "ns=2;i=3001", description: "Quality test result", data_type: "Boolean" },
-      { node_name: "Error_Count", node_id: "ns=2;i=3002", description: "Error counter", data_type: "Int32" },
-    ],
-    status: "error",
-    last_checked: new Date(),
-    is_connected: false,
-    created_at: new Date(),
-  },
-];
+// Mock data for development (removed as requested)
+export const mockPLCs: PLC[] = [];
 
-export const mockNodeData: NodeData[] = [
-  {
-    node_id: "ns=2;i=1001",
-    node_name: "Temperature_01",
-    current_value: 23.5,
-    timestamp: new Date(),
-    quality: "Good",
-    data_type: "Float",
-  },
-  {
-    node_id: "ns=2;i=1002",
-    node_name: "Pressure_01",
-    current_value: 1.2,
-    timestamp: new Date(),
-    quality: "Good",
-    data_type: "Float",
-  },
-  {
-    node_id: "ns=2;i=1003",
-    node_name: "Motor_Speed",
-    current_value: 1450,
-    timestamp: new Date(),
-    quality: "Good",
-    data_type: "Int32",
-  },
-];
+export const mockNodeData: NodeData[] = [];

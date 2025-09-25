@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MoreVertical, Settings, RefreshCw, Wifi } from "lucide-react";
+import { MoreVertical, Settings, RefreshCw, Wifi, Trash2 } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import StatusIndicator from "./StatusIndicator";
 import type { PLC } from "@shared/schema";
@@ -19,6 +20,7 @@ interface PLCListItemProps {
   onDisconnect?: (plcId: string) => void;
   onRefresh?: (plcId: string) => void;
   onConfigure?: (plcId: string) => void;
+  onDelete?: (plcId: string, plcNo: number) => void;
 }
 
 export default function PLCListItem({ 
@@ -26,7 +28,8 @@ export default function PLCListItem({
   onConnect, 
   onDisconnect, 
   onRefresh, 
-  onConfigure 
+  onConfigure,
+  onDelete
 }: PLCListItemProps) {
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -53,6 +56,13 @@ export default function PLCListItem({
   const handleConfigure = () => {
     console.log(`Configuring PLC ${plc.plc_name}`);
     onConfigure?.(plc.id);
+  };
+
+  const handleDelete = () => {
+    if (confirm(`Are you sure you want to delete PLC "${plc.plc_name}" (No. ${plc.plc_no}) and all its associated nodes from the database?`)) {
+      console.log(`Deleting PLC ${plc.plc_name} (No. ${plc.plc_no})`);
+      onDelete?.(plc.id, plc.plc_no || 1);
+    }
   };
 
   const truncatedName = plc.plc_name.length > 25 
@@ -124,6 +134,15 @@ export default function PLCListItem({
               <DropdownMenuItem onClick={handleConfigure} data-testid={`menu-configure-${plc.id}`}>
                 <Settings className="h-4 w-4 mr-2" />
                 Configure
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleDelete} 
+                data-testid={`menu-delete-${plc.id}`}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

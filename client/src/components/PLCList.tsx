@@ -12,6 +12,7 @@ interface PLCListProps {
   onDisconnect?: (plcId: string) => void;
   onRefresh?: (plcId: string) => void;
   onConfigure?: (plcId: string) => void;
+  onDelete?: (plcId: string, plcNo: number) => void;
 }
 
 export default function PLCList({ 
@@ -19,7 +20,8 @@ export default function PLCList({
   onConnect, 
   onDisconnect, 
   onRefresh, 
-  onConfigure 
+  onConfigure,
+  onDelete
 }: PLCListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -27,14 +29,16 @@ export default function PLCList({
   const filteredAndSortedPLCs = useMemo(() => {
     let filtered = plcs.filter((plc) => 
       plc.plc_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plc.plc_no.toString().includes(searchTerm) ||
+      (plc.plc_no?.toString().includes(searchTerm) ?? false) ||
       plc.plc_ip.includes(searchTerm)
     );
 
     return filtered.sort((a, b) => {
+      const aPlcNo = a.plc_no ?? 0;
+      const bPlcNo = b.plc_no ?? 0;
       const comparison = sortOrder === "asc" 
-        ? a.plc_no - b.plc_no 
-        : b.plc_no - a.plc_no;
+        ? aPlcNo - bPlcNo 
+        : bPlcNo - aPlcNo;
       return comparison;
     });
   }, [plcs, searchTerm, sortOrder]);
@@ -84,6 +88,7 @@ export default function PLCList({
               onDisconnect={onDisconnect}
               onRefresh={onRefresh}
               onConfigure={onConfigure}
+              onDelete={onDelete}
             />
           ))}
           

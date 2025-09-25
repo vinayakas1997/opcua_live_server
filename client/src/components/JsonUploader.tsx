@@ -30,15 +30,19 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
       const validatedData = rawJSONSchema.parse(json);
       const normalizedPLCs = normalizePLCConfig(validatedData);
       
+      // Store the original file for backend upload
+      (window as any).originalJsonFile = file;
+      
       // For now, take the first PLC for single config handling
+      const firstRawPLC = validatedData.plcs[0];
       const firstNormalizedPLC = normalizedPLCs[0];
-      if (firstNormalizedPLC) {
+      if (firstRawPLC && firstNormalizedPLC) {
         const apiConfig: PLCConfig = {
-          plc_name: firstNormalizedPLC.plc_name,
+          plc_name: firstRawPLC.plc_name,
           // Only include plc_no if it's a positive number, otherwise omit it (it's optional)
-          ...(firstNormalizedPLC.plc_no && firstNormalizedPLC.plc_no > 0 ? { plc_no: firstNormalizedPLC.plc_no } : {}),
-          plc_ip: firstNormalizedPLC.plc_ip,
-          opcua_url: firstNormalizedPLC.opcua_url,
+          ...(firstRawPLC.plc_no && firstRawPLC.plc_no > 0 ? { plc_no: firstRawPLC.plc_no } : {}),
+          plc_ip: firstRawPLC.plc_ip,
+          opcua_url: firstRawPLC.opcua_url,
           address_mappings: firstNormalizedPLC.variables
             .filter(v => !v.parentId) // Only parent variables
             .map(v => ({
@@ -52,9 +56,9 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
         setUploadedConfig(apiConfig);
         console.log('JSON config validated and normalized successfully:', apiConfig);
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
         setError('Failed to process file');
       }
@@ -84,9 +88,51 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
     }
   };
 
-  const handleAddToList = () => {
+  const handleAddToList = async () => {
     if (uploadedConfig) {
-      onConfigUploaded(uploadedConfig);
+      try {
+        // First, call the original callback for UI updates
+        onConfigUploaded(uploadedConfig);
+        
+        // Then upload to backend for database storage using the ORIGINAL file
+        console.log("🚀 Uploading ORIGINAL JSON to backend for database storage...");
+        
+        // Use the original file that was stored during processFile
+        const originalFile = (window as any).originalJsonFile;
+        
+        if (originalFile) {
+          // Create FormData for file upload using the original file
+          const formData = new FormData();
+          formData.append('jsonFile', originalFile, originalFile.name);
+          
+          const response = await fetch('/api/upload/json', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log("✅ Backend upload successful:", result);
+            console.log(`🎉 Created ${result.totalCreated} nodes in database`);
+          } else {
+            const errorData = await response.json();
+            console.error("❌ Backend upload failed:", errorData);
+            
+            // Handle duplicate PLC error specifically
+            if (response.status === 409 && errorData.action_required === "delete_and_reupload") {
+              setError(`${errorData.message}\n\nExisting PLC Details:\n- PLC Name: ${errorData.existing_plc.plc_name}\n- IP: ${errorData.existing_plc.plc_ip}\n- OPC UA URL: ${errorData.existing_plc.opcua_url}\n- Nodes Count: ${errorData.existing_plc.existing_nodes_count}`);
+            } else {
+              setError(errorData.message || "Upload failed");
+            }
+          }
+        } else {
+          console.error("❌ Original file not found - cannot upload to backend");
+        }
+        
+      } catch (error) {
+        console.error("❌ Error uploading to backend:", error);
+      }
+      
       setUploadedConfig(null);
       onClose?.();
     }
@@ -186,7 +232,7 @@ export default function JsonUploader({ onConfigUploaded, onClose }: JsonUploader
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">PLC Number</label>
-                <p className="font-mono text-sm">{uploadedConfig.plc_no}</p>
+                <p className="font-mono text-sm">{uploadedConfig.plc_no ?? 'Not specified'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">IP Address</label>
